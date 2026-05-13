@@ -44,9 +44,9 @@ const nextConfig = {
         protocol: "https",
         hostname: "medusa-server-testing.s3.us-east-1.amazonaws.com",
       },
-      ...(process.env.NEXT_PUBLIC_MINIO_ENDPOINT ? [{ // Note: needed when using MinIO bucket storage for media
+      ...(process.env.NEXT_PUBLIC_R2_PUBLIC_URL ? [{
         protocol: "https",
-        hostname: process.env.NEXT_PUBLIC_MINIO_ENDPOINT,
+        hostname: process.env.NEXT_PUBLIC_R2_PUBLIC_URL.replace(/^https?:\/\//, ""),
       }] : []),
     ],
   },

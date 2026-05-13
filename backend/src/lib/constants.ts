@@ -59,12 +59,13 @@ export const COOKIE_SECRET = assertValue(
 )
 
 /**
- * (optional) Minio configuration for file storage
+ * (optional) Cloudflare R2 configuration for file storage
  */
-export const MINIO_ENDPOINT = process.env.MINIO_ENDPOINT;
-export const MINIO_ACCESS_KEY = process.env.MINIO_ACCESS_KEY;
-export const MINIO_SECRET_KEY = process.env.MINIO_SECRET_KEY;
-export const MINIO_BUCKET = process.env.MINIO_BUCKET; // Optional, if not set bucket will be called: medusa-media
+export const R2_ACCESS_KEY_ID = process.env.R2_ACCESS_KEY_ID;
+export const R2_SECRET_ACCESS_KEY = process.env.R2_SECRET_ACCESS_KEY;
+export const R2_BUCKET = process.env.R2_BUCKET;
+export const R2_ENDPOINT = process.env.R2_ENDPOINT;
+export const R2_PUBLIC_URL = process.env.R2_PUBLIC_URL;
 
 /**
  * (optional) Resend API Key and from Email - do not set if using SendGrid

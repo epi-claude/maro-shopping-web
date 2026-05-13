@@ -16,10 +16,11 @@ import {
   STRIPE_API_KEY,
   STRIPE_WEBHOOK_SECRET,
   WORKER_MODE,
-  MINIO_ENDPOINT,
-  MINIO_ACCESS_KEY,
-  MINIO_SECRET_KEY,
-  MINIO_BUCKET,
+  R2_ACCESS_KEY_ID,
+  R2_SECRET_ACCESS_KEY,
+  R2_BUCKET,
+  R2_ENDPOINT,
+  R2_PUBLIC_URL,
   MEILISEARCH_HOST,
   MEILISEARCH_ADMIN_KEY
 } from 'lib/constants';
@@ -55,14 +56,19 @@ const medusaConfig = {
       resolve: '@medusajs/file',
       options: {
         providers: [
-          ...(MINIO_ENDPOINT && MINIO_ACCESS_KEY && MINIO_SECRET_KEY ? [{
-            resolve: './src/modules/minio-file',
-            id: 'minio',
+          ...(R2_ACCESS_KEY_ID && R2_SECRET_ACCESS_KEY ? [{
+            resolve: '@medusajs/medusa/file-s3',
+            id: 's3',
             options: {
-              endPoint: MINIO_ENDPOINT,
-              accessKey: MINIO_ACCESS_KEY,
-              secretKey: MINIO_SECRET_KEY,
-              bucket: MINIO_BUCKET // Optional, default: medusa-media
+              file_url: R2_PUBLIC_URL,
+              access_key_id: R2_ACCESS_KEY_ID,
+              secret_access_key: R2_SECRET_ACCESS_KEY,
+              region: 'auto',
+              bucket: R2_BUCKET,
+              endpoint: R2_ENDPOINT,
+              additional_client_config: {
+                forcePathStyle: true,
+              },
             }
           }] : [{
             resolve: '@medusajs/file-local',
