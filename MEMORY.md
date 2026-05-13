@@ -12,8 +12,7 @@
 - [ ] Verify sending domain `notify.e-dmm.com` in Resend dashboard (DNS TXT + MX records)
 - [ ] Create Railway project `Maro Shopping Web` and connect maro-shopping-web repo
 - [ ] Inject all env vars into Railway services (use Railway dashboard variables tab)
-- [ ] Obtain Medusa publishable API key after first local seed (Admin → Settings → API Keys)
-- [ ] Add publishable key to storefront env as NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY
+- [x] Publishable API key created (title: Storefront) — set in Railway storefront service as NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY
 
 ## Known gotchas
 - Resend: from address must use verified domain — notify.e-dmm.com needs DNS records in Cloudflare
