@@ -30,6 +30,27 @@
 **Decision**: No Stripe integration in Phase 1.
 **Rationale**: Client finalising Stripe account. Env var scaffold (STRIPE_API_KEY, STRIPE_WEBHOOK_SECRET) in place for zero-friction Phase 2 activation.
 
+## ADR-007 — Upstream fork tracking strategy
+**Date**: Phase 1
+**Status**: Accepted
+**Decision**: Track `rpuls/medusajs-2.0-for-railway-boilerplate` as a git `upstream` remote. Sync ad-hoc, triggered by GitHub Watch notifications (Releases only) on the upstream repo.
+**Rationale**: The boilerplate evolves with Medusa v2. Periodic merges keep us current without the overhead of a fixed schedule.
+**Rules**:
+- `medusa-config.js` must remain a thin shell — it only imports from `src/config/custom-modules.ts`. Never add Maro logic directly to it.
+- All Maro-specific code lives under `backend/src/modules/`, `backend/src/config/`, `backend/src/workflows/`, `storefront/src/modules/`. Never edit upstream-owned files directly.
+- Adding a new payment provider = add a file in `src/modules/payment-{name}/` and one entry in `src/config/payments.ts`. Zero other files touched.
+- Sync process: `git fetch upstream && git diff upstream/main -- medusa-config.js package.json` to review upstream changes, then merge selectively.
+
+## ADR-008 — Payment providers: PayWise, COD, Bank Transfer
+**Date**: Phase 1
+**Status**: Accepted
+**Decision**: Three payment providers for the TT market. No Stripe in Phase 1.
+**Providers**:
+- `payment-cod` — Cash on Delivery. Admin captures manually after delivery.
+- `payment-bank-transfer` — Direct deposit. Shows bank details at checkout. Admin captures after confirming deposit reference.
+- `payment-paywise` — PayWise wallet/card (TT-local gateway, licensed by Central Bank of TT). Pending: `fees` field structure to be confirmed with PayWise developer support.
+**Rationale**: Stripe is not the dominant payment method in Trinidad. PayWise is a local licensed EMI. COD and bank transfer are standard for TT e-commerce.
+
 ## ADR-006 — Resend on notify.e-dmm.com
 **Date**: Phase 1
 **Status**: Accepted

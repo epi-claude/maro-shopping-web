@@ -86,6 +86,13 @@ export const STRIPE_API_KEY = process.env.STRIPE_API_KEY;
 export const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET;
 
 /**
+ * (optional) PayWise payment gateway
+ */
+export const PAYWISE_API_KEY = process.env.PAYWISE_API_KEY;
+export const PAYWISE_MERCHANT_KEY = process.env.PAYWISE_MERCHANT_KEY;
+export const PAYWISE_ENV = process.env.PAYWISE_ENV || 'sandbox';
+
+/**
  * (optional) Meilisearch configuration
  */
 export const MEILISEARCH_HOST = process.env.MEILISEARCH_HOST;
