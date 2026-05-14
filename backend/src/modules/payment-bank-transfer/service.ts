@@ -1,11 +1,15 @@
-import { AbstractPaymentProvider, PaymentSessionStatus } from '@medusajs/framework/utils'
+import { AbstractPaymentProvider } from '@medusajs/framework/utils'
 import {
-  CreatePaymentProviderSession,
-  PaymentProviderError,
-  PaymentProviderSessionResponse,
-  ProviderWebhookPayload,
-  UpdatePaymentProviderSession,
-  WebhookActionResult,
+  AuthorizePaymentInput, AuthorizePaymentOutput,
+  CapturePaymentInput, CapturePaymentOutput,
+  CancelPaymentInput, CancelPaymentOutput,
+  InitiatePaymentInput, InitiatePaymentOutput,
+  DeletePaymentInput, DeletePaymentOutput,
+  GetPaymentStatusInput, GetPaymentStatusOutput,
+  RefundPaymentInput, RefundPaymentOutput,
+  RetrievePaymentInput, RetrievePaymentOutput,
+  UpdatePaymentInput, UpdatePaymentOutput,
+  ProviderWebhookPayload, WebhookActionResult,
 } from '@medusajs/framework/types'
 
 interface BankTransferOptions {
@@ -19,92 +23,66 @@ interface BankTransferOptions {
 export class BankTransferPaymentService extends AbstractPaymentProvider<BankTransferOptions> {
   static identifier = 'bank-transfer'
 
-  private options: BankTransferOptions
-
-  constructor(container: Record<string, unknown>, options: BankTransferOptions) {
-    super(container, options)
-    this.options = options
-  }
-
-  async initiatePayment(
-    data: CreatePaymentProviderSession
-  ): Promise<PaymentProviderError | PaymentProviderSessionResponse> {
+  async initiatePayment(input: InitiatePaymentInput): Promise<InitiatePaymentOutput> {
     return {
+      id: `bt-${Date.now()}`,
       data: {
         status: 'awaiting_transfer',
-        amount: data.amount,
-        currency_code: data.currency_code,
-        // Bank details passed to storefront so checkout can display them
+        amount: input.amount,
+        currency_code: input.currency_code,
+        // Bank details surfaced to storefront so checkout can display them
         bank_details: {
-          bank_name: this.options.bank_name,
-          account_name: this.options.account_name,
-          account_number: this.options.account_number,
-          routing_number: this.options.routing_number,
-          instructions: this.options.instructions,
+          bank_name: this.config.bank_name,
+          account_name: this.config.account_name,
+          account_number: this.config.account_number,
+          routing_number: this.config.routing_number,
+          instructions: this.config.instructions,
         },
       },
     }
   }
 
-  async authorizePayment(
-    paymentSessionData: Record<string, unknown>
-  ): Promise<PaymentProviderError | { status: PaymentSessionStatus; data: Record<string, unknown> }> {
+  async authorizePayment(input: AuthorizePaymentInput): Promise<AuthorizePaymentOutput> {
     // Stays pending until admin manually captures after confirming the deposit
-    return { status: PaymentSessionStatus.PENDING, data: paymentSessionData }
+    return { status: 'pending', data: input.data ?? {} }
   }
 
-  async capturePayment(
-    paymentSessionData: Record<string, unknown>
-  ): Promise<PaymentProviderError | Record<string, unknown>> {
-    return { ...paymentSessionData, status: 'captured' }
+  async capturePayment(input: CapturePaymentInput): Promise<CapturePaymentOutput> {
+    return { data: { ...input.data, status: 'captured' } }
   }
 
-  async cancelPayment(
-    paymentSessionData: Record<string, unknown>
-  ): Promise<PaymentProviderError | Record<string, unknown>> {
-    return { ...paymentSessionData, status: 'cancelled' }
+  async cancelPayment(input: CancelPaymentInput): Promise<CancelPaymentOutput> {
+    return { data: { ...input.data, status: 'cancelled' } }
   }
 
-  async refundPayment(
-    paymentSessionData: Record<string, unknown>,
-    refundAmount: number
-  ): Promise<PaymentProviderError | Record<string, unknown>> {
-    return { ...paymentSessionData, status: 'refunded', refund_amount: refundAmount }
+  async refundPayment(input: RefundPaymentInput): Promise<RefundPaymentOutput> {
+    return { data: { ...input.data, status: 'refunded', refund_amount: input.amount } }
   }
 
-  async retrievePayment(
-    paymentSessionData: Record<string, unknown>
-  ): Promise<PaymentProviderError | Record<string, unknown>> {
-    return paymentSessionData
+  async retrievePayment(input: RetrievePaymentInput): Promise<RetrievePaymentOutput> {
+    return { data: input.data ?? {} }
   }
 
-  async updatePayment(
-    context: UpdatePaymentProviderSession
-  ): Promise<PaymentProviderError | PaymentProviderSessionResponse> {
-    return { data: { ...context.data, amount: context.amount } }
+  async updatePayment(input: UpdatePaymentInput): Promise<UpdatePaymentOutput> {
+    return { data: { ...input.data, amount: input.amount } }
   }
 
-  async deletePayment(
-    paymentSessionData: Record<string, unknown>
-  ): Promise<PaymentProviderError | Record<string, unknown>> {
-    return paymentSessionData
+  async deletePayment(input: DeletePaymentInput): Promise<DeletePaymentOutput> {
+    return { data: input.data ?? {} }
   }
 
-  async getPaymentStatus(
-    paymentSessionData: Record<string, unknown>
-  ): Promise<PaymentSessionStatus> {
-    const status = paymentSessionData.status as string
-    const map: Record<string, PaymentSessionStatus> = {
-      awaiting_transfer: PaymentSessionStatus.PENDING,
-      captured: PaymentSessionStatus.AUTHORIZED,
-      cancelled: PaymentSessionStatus.CANCELED,
-      refunded: PaymentSessionStatus.CANCELED,
+  async getPaymentStatus(input: GetPaymentStatusInput): Promise<GetPaymentStatusOutput> {
+    const map: Record<string, GetPaymentStatusOutput['status']> = {
+      awaiting_transfer: 'pending',
+      captured: 'authorized',
+      cancelled: 'canceled',
+      refunded: 'canceled',
     }
-    return map[status] ?? PaymentSessionStatus.PENDING
+    return { status: map[(input.data?.status as string) ?? ''] ?? 'pending' }
   }
 
   async getWebhookActionAndData(
-    payload: ProviderWebhookPayload['payload']
+    data: ProviderWebhookPayload['payload']
   ): Promise<WebhookActionResult> {
     return { action: 'not_supported' }
   }

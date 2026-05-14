@@ -1,4 +1,4 @@
-import { Modules } from '@medusajs/utils'
+import { Modules } from '@medusajs/framework/utils'
 import {
   R2_ACCESS_KEY_ID,
   R2_SECRET_ACCESS_KEY,

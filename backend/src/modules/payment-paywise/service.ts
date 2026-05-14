@@ -1,11 +1,15 @@
-import { AbstractPaymentProvider, PaymentSessionStatus } from '@medusajs/framework/utils'
+import { AbstractPaymentProvider } from '@medusajs/framework/utils'
 import {
-  CreatePaymentProviderSession,
-  PaymentProviderError,
-  PaymentProviderSessionResponse,
-  ProviderWebhookPayload,
-  UpdatePaymentProviderSession,
-  WebhookActionResult,
+  AuthorizePaymentInput, AuthorizePaymentOutput,
+  CapturePaymentInput, CapturePaymentOutput,
+  CancelPaymentInput, CancelPaymentOutput,
+  InitiatePaymentInput, InitiatePaymentOutput,
+  DeletePaymentInput, DeletePaymentOutput,
+  GetPaymentStatusInput, GetPaymentStatusOutput,
+  RefundPaymentInput, RefundPaymentOutput,
+  RetrievePaymentInput, RetrievePaymentOutput,
+  UpdatePaymentInput, UpdatePaymentOutput,
+  ProviderWebhookPayload, WebhookActionResult,
 } from '@medusajs/framework/types'
 import { PaywiseClient } from './client'
 
@@ -20,28 +24,22 @@ export class PaywisePaymentService extends AbstractPaymentProvider<PaywiseOption
 
   private client: PaywiseClient
 
-  constructor(container: Record<string, unknown>, options: PaywiseOptions) {
-    super(container, options)
+  constructor(cradle: Record<string, unknown>, options: PaywiseOptions) {
+    super(cradle, options)
     this.client = new PaywiseClient(options.api_key, options.merchant_key, options.environment)
   }
 
-  async initiatePayment(
-    data: CreatePaymentProviderSession
-  ): Promise<PaymentProviderError | PaymentProviderSessionResponse> {
-    // context.extra should contain payer details passed from the storefront
-    const context = data.context as Record<string, unknown> | undefined
-    const customer = (context?.customer ?? {}) as Record<string, string>
-
+  async initiatePayment(input: InitiatePaymentInput): Promise<InitiatePaymentOutput> {
+    const customer = (input.context?.customer ?? {}) as Record<string, string>
     const [firstName, ...rest] = (customer.name ?? 'Customer').split(' ')
     const lastName = rest.join(' ') || firstName
-
-    const amountStr = (Number(data.amount) / 100).toFixed(2)
+    const amountStr = (Number(input.amount) / 100).toFixed(2)
 
     const response = await this.client.requestPayment({
-      id: data.context?.idempotency_key as string ?? `maro-${Date.now()}`,
+      id: (input.context?.idempotency_key as string) ?? `maro-${Date.now()}`,
       amount: amountStr,
-      currency: (data.currency_code ?? 'TTD').toUpperCase(),
-      description: `Maro Shopping order`,
+      currency: (input.currency_code ?? 'TTD').toUpperCase(),
+      description: 'Maro Shopping order',
       // TODO: populate fees once PayWise confirms fee key structure for this merchant account
       fees: {},
       payers: [{
@@ -55,89 +53,59 @@ export class PaywisePaymentService extends AbstractPaymentProvider<PaywiseOption
     })
 
     if (response.status === 'error') {
-      return { error: response.message, code: String(response.code), detail: response }
+      throw new Error(`PayWise error: ${response.message}`)
     }
 
-    return {
-      data: {
-        intent_id: response.intent_id,
-        paywise_status: 'pending',
-        raw: response.data,
-      },
-    }
+    return { id: response.intent_id ?? `pw-${Date.now()}`, data: { intent_id: response.intent_id, paywise_status: 'pending', raw: response.data } }
   }
 
-  async authorizePayment(
-    paymentSessionData: Record<string, unknown>
-  ): Promise<PaymentProviderError | { status: PaymentSessionStatus; data: Record<string, unknown> }> {
-    const intentId = paymentSessionData.intent_id as string
-    if (!intentId) {
-      return { status: PaymentSessionStatus.PENDING, data: paymentSessionData }
-    }
+  async authorizePayment(input: AuthorizePaymentInput): Promise<AuthorizePaymentOutput> {
+    const intentId = input.data?.intent_id as string
+    if (!intentId) return { status: 'pending', data: input.data ?? {} }
 
     const response = await this.client.getPaymentStatus(intentId)
-
     if (response.status === 'error') {
-      return { status: PaymentSessionStatus.ERROR, data: { ...paymentSessionData, error: response.message } }
+      return { status: 'error', data: { ...input.data, error: response.message } }
     }
 
     const pwStatus = (response.data?.status ?? response.data?.payment_status ?? '') as string
-    return {
-      status: this.mapStatus(pwStatus),
-      data: { ...paymentSessionData, paywise_status: pwStatus, raw: response.data },
-    }
+    return { status: this.mapStatus(pwStatus), data: { ...input.data, paywise_status: pwStatus } }
   }
 
-  async capturePayment(
-    paymentSessionData: Record<string, unknown>
-  ): Promise<PaymentProviderError | Record<string, unknown>> {
-    // PayWise wallet payments are captured on authorisation — no separate capture step
-    return { ...paymentSessionData, status: 'captured' }
+  async capturePayment(input: CapturePaymentInput): Promise<CapturePaymentOutput> {
+    return { data: { ...input.data, status: 'captured' } }
   }
 
-  async cancelPayment(
-    paymentSessionData: Record<string, unknown>
-  ): Promise<PaymentProviderError | Record<string, unknown>> {
-    const intentId = paymentSessionData.intent_id as string
-    if (intentId) {
-      await this.client.cancelPayment(intentId)
-    }
-    return { ...paymentSessionData, paywise_status: 'cancelled' }
+  async cancelPayment(input: CancelPaymentInput): Promise<CancelPaymentOutput> {
+    const intentId = input.data?.intent_id as string
+    if (intentId) await this.client.cancelPayment(intentId)
+    return { data: { ...input.data, paywise_status: 'cancelled' } }
   }
 
-  async refundPayment(
-    paymentSessionData: Record<string, unknown>,
-    refundAmount: number
-  ): Promise<PaymentProviderError | Record<string, unknown>> {
+  async refundPayment(input: RefundPaymentInput): Promise<RefundPaymentOutput> {
     // TODO: implement when PayWise exposes a refund endpoint
-    return { error: 'Refunds must be processed manually via the PayWise dashboard', code: 'unsupported', detail: {} }
+    throw new Error('Refunds must be processed manually via the PayWise dashboard')
   }
 
-  async retrievePayment(
-    paymentSessionData: Record<string, unknown>
-  ): Promise<PaymentProviderError | Record<string, unknown>> {
-    const intentId = paymentSessionData.intent_id as string
-    if (!intentId) return paymentSessionData
+  async retrievePayment(input: RetrievePaymentInput): Promise<RetrievePaymentOutput> {
+    const intentId = input.data?.intent_id as string
+    if (!intentId) return { data: input.data ?? {} }
     const response = await this.client.getPaymentStatus(intentId)
-    return { ...paymentSessionData, raw: response.data }
+    return { data: { ...input.data, raw: response.data } }
   }
 
-  async updatePayment(
-    context: UpdatePaymentProviderSession
-  ): Promise<PaymentProviderError | PaymentProviderSessionResponse> {
-    return { data: { ...context.data, amount: context.amount } }
+  async updatePayment(input: UpdatePaymentInput): Promise<UpdatePaymentOutput> {
+    return { data: { ...input.data, amount: input.amount } }
   }
 
-  async deletePayment(
-    paymentSessionData: Record<string, unknown>
-  ): Promise<PaymentProviderError | Record<string, unknown>> {
-    return this.cancelPayment(paymentSessionData)
+  async deletePayment(input: DeletePaymentInput): Promise<DeletePaymentOutput> {
+    const intentId = input.data?.intent_id as string
+    if (intentId) await this.client.cancelPayment(intentId)
+    return { data: { ...input.data, paywise_status: 'cancelled' } }
   }
 
-  async getPaymentStatus(
-    paymentSessionData: Record<string, unknown>
-  ): Promise<PaymentSessionStatus> {
-    return this.mapStatus(paymentSessionData.paywise_status as string)
+  async getPaymentStatus(input: GetPaymentStatusInput): Promise<GetPaymentStatusOutput> {
+    return { status: this.mapStatus(input.data?.paywise_status as string) }
   }
 
   async getWebhookActionAndData(
@@ -147,30 +115,25 @@ export class PaywisePaymentService extends AbstractPaymentProvider<PaywiseOption
     const pwStatus = (body?.status ?? '') as string
 
     if (pwStatus === 'completed' || pwStatus === 'successful') {
-      return {
-        action: 'authorized',
-        data: { session_id: body.reference as string, amount: Number(body.amount) * 100 },
-      }
+      return { action: 'authorized', data: { session_id: body.reference as string, amount: Number(body.amount) * 100 } }
     }
-
     if (pwStatus === 'failed' || pwStatus === 'cancelled') {
-      return { action: 'failed', data: { session_id: body.reference as string } }
+      return { action: 'failed', data: { session_id: body.reference as string, amount: 0 } }
     }
-
     return { action: 'not_supported' }
   }
 
-  private mapStatus(pwStatus: string): PaymentSessionStatus {
-    const map: Record<string, PaymentSessionStatus> = {
-      pending: PaymentSessionStatus.PENDING,
-      processing: PaymentSessionStatus.PENDING,
-      completed: PaymentSessionStatus.AUTHORIZED,
-      successful: PaymentSessionStatus.AUTHORIZED,
-      captured: PaymentSessionStatus.AUTHORIZED,
-      failed: PaymentSessionStatus.ERROR,
-      cancelled: PaymentSessionStatus.CANCELED,
-      canceled: PaymentSessionStatus.CANCELED,
+  private mapStatus(pwStatus: string): GetPaymentStatusOutput['status'] {
+    const map: Record<string, GetPaymentStatusOutput['status']> = {
+      pending: 'pending',
+      processing: 'pending',
+      completed: 'authorized',
+      successful: 'authorized',
+      captured: 'authorized',
+      failed: 'error',
+      cancelled: 'canceled',
+      canceled: 'canceled',
     }
-    return map[pwStatus?.toLowerCase()] ?? PaymentSessionStatus.PENDING
+    return map[pwStatus?.toLowerCase()] ?? 'pending'
   }
 }
