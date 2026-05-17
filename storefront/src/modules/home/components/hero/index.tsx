@@ -1,33 +1,22 @@
-import { Github } from "@medusajs/icons"
-import { Button, Heading } from "@medusajs/ui"
+import LocalizedClientLink from "@modules/common/components/localized-client-link"
 
 const Hero = () => {
   return (
-    <div className="h-[75vh] w-full border-b border-ui-border-base relative bg-ui-bg-subtle">
-      <div className="absolute inset-0 z-10 flex flex-col justify-center items-center text-center small:p-32 gap-6">
-        <span>
-          <Heading
-            level="h1"
-            className="text-3xl leading-10 text-ui-fg-base font-normal"
-          >
-            Well done! You have successfully deployed your Medusa 2.0 store on Railway!
-          </Heading>
-          <Heading
-            level="h2"
-            className="text-3xl leading-10 text-ui-fg-subtle font-normal"
-          >
-            Need help customizing your store?
-          </Heading>
-        </span>
-        <a
-          href="https://funkyton.com/medusajs-2-0-is-finally-here/"
-          target="_blank"
-        >
-          <h1 style={{ textDecoration: "underline" }}>
-            Visit the tutorial
-          </h1>
-        </a>
+    <div className="h-[75vh] w-full flex flex-col justify-center items-center text-center p-8 gap-8 bg-maro-purple">
+      <div className="flex flex-col items-center gap-4 max-w-2xl">
+        <h1 className="text-5xl small:text-7xl text-white font-light tracking-widest uppercase">
+          Maro.Shopping
+        </h1>
+        <p className="text-lg small:text-xl text-white/80 max-w-md">
+          Trinidad&apos;s premier online shopping destination
+        </p>
       </div>
+      <LocalizedClientLink
+        href="/store"
+        className="bg-maro-yellow hover:bg-maro-yellow-dark text-maro-black font-semibold px-10 py-4 text-lg transition-colors rounded"
+      >
+        Shop Now
+      </LocalizedClientLink>
     </div>
   )
 }
