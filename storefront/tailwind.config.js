@@ -34,6 +34,14 @@ module.exports = {
           80: "#1F2937",
           90: "#111827",
         },
+        maro: {
+          purple: "#C4A8E0",
+          "purple-dark": "#9B7BC7",
+          "purple-light": "#EDE0F8",
+          yellow: "#F7F585",
+          "yellow-dark": "#E8E560",
+          black: "#1A1A1A",
+        },
       },
       borderRadius: {
         none: "0px",

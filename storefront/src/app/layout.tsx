@@ -4,6 +4,11 @@ import "styles/globals.css"
 
 export const metadata: Metadata = {
   metadataBase: new URL(getBaseURL()),
+  title: {
+    default: "Maro Shopping",
+    template: "%s | Maro Shopping",
+  },
+  description: "Shop the latest products at Maro Shopping — Trinidad's online store.",
 }
 
 export default function RootLayout(props: { children: React.ReactNode }) {
