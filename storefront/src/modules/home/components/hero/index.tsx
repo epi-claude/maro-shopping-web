@@ -9,7 +9,7 @@ const Hero = () => {
         <span className="text-white/60 text-xs tracking-[0.3em] uppercase font-light">
           Trinidad&apos;s Online Store
         </span>
-        <h1 className="font-display text-6xl small:text-7xl text-white font-light tracking-wide leading-none">
+        <h1 className="font-display text-4xl xsmall:text-6xl small:text-7xl text-white font-light tracking-wide leading-none">
           Maro.Shopping
         </h1>
         <p className="text-base text-white/75 max-w-xs font-light leading-relaxed">
