@@ -1,9 +1,6 @@
-import dynamic from "next/dynamic"
+"use client"
 
-const SearchModal = dynamic(
-  () => import("@modules/search/templates/search-modal"),
-  { ssr: false }
-)
+import SearchModal from "@modules/search/templates/search-modal"
 
 export default function SearchModalRoute() {
   return <SearchModal />
