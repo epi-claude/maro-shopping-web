@@ -5,7 +5,10 @@ const endpoint =
 
 const apiKey = process.env.NEXT_PUBLIC_SEARCH_API_KEY || "test_key"
 
-export const searchClient = instantMeiliSearch(endpoint, apiKey)
+export const searchClient =
+  typeof window !== "undefined"
+    ? instantMeiliSearch(endpoint, apiKey)
+    : ({} as ReturnType<typeof instantMeiliSearch>)
 
 export const SEARCH_INDEX_NAME =
   process.env.NEXT_PUBLIC_INDEX_NAME || "products"
