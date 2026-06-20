@@ -1,6 +1,8 @@
 import { Metadata } from "next"
 import { notFound } from "next/navigation"
 
+export const revalidate = 3600
+
 import ProductTemplate from "@modules/products/templates"
 import { getRegion, listRegions } from "@lib/data/regions"
 import { getProductByHandle, getProductsList } from "@lib/data/products"

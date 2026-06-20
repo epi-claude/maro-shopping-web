@@ -51,6 +51,18 @@
 - `payment-paywise` — PayWise wallet/card (TT-local gateway, licensed by Central Bank of TT). Pending: `fees` field structure to be confirmed with PayWise developer support.
 **Rationale**: Stripe is not the dominant payment method in Trinidad. PayWise is a local licensed EMI. COD and bank transfer are standard for TT e-commerce.
 
+## ADR-009 — ISR caching for product pages with on-demand revalidation
+**Date**: 2026-06-20
+**Status**: Accepted
+**Decision**: Product detail pages use `export const revalidate = 3600` (1-hour ISR) plus a `/api/revalidate` endpoint for on-demand cache busting.
+**Rationale**: Without ISR, every product page visit triggered 3 sequential backend roundtrips (region fetch → product fetch → related products fetch). ISR caches the fully-rendered HTML, eliminating backend calls for all but the first visitor per hour. The revalidation endpoint (POST `/api/revalidate?secret=REVALIDATE_SECRET&tag=products`) allows immediate cache busting after catalog changes so product updates don't wait up to an hour to appear.
+**Usage**:
+```bash
+curl -X POST "https://maro-shopping.up.railway.app/api/revalidate?secret=REVALIDATE_SECRET&tag=products"
+```
+**Tags in use**: `products` (all product fetches), `regions` (region fetches).
+**Env var required**: `REVALIDATE_SECRET` on Railway storefront service.
+
 ## ADR-006 — Resend on notify.e-dmm.com
 **Date**: Phase 1
 **Status**: Accepted
