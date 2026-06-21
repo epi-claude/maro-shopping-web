@@ -6,7 +6,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
-  const endpoint = process.env.NEXT_PUBLIC_SEARCH_ENDPOINT || ""
+  const endpoint = req.nextUrl.searchParams.get("endpoint") || process.env.NEXT_PUBLIC_SEARCH_ENDPOINT || ""
   const apiKey = process.env.NEXT_PUBLIC_SEARCH_API_KEY || ""
   const headers = apiKey ? { Authorization: `Bearer ${apiKey}` } : {}
 
