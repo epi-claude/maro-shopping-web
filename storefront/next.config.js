@@ -43,14 +43,10 @@ const nextConfig = {
         protocol: "https",
         hostname: "medusa-server-testing.s3.us-east-1.amazonaws.com",
       },
-      ...(process.env.NEXT_PUBLIC_R2_PUBLIC_URL ? [{
-        protocol: "https",
-        hostname: process.env.NEXT_PUBLIC_R2_PUBLIC_URL.replace(/^https?:\/\//, ""),
-      }] : []),
-      // Scraper portfolio bucket (products 011–025)
+      // All Cloudflare R2 public buckets
       {
         protocol: "https",
-        hostname: "pub-95e07a2abf694a409a97797859e96c75.r2.dev",
+        hostname: "*.r2.dev",
       },
     ],
   },
