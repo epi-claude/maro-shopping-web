@@ -6,6 +6,8 @@ import TrustBar from "@modules/home/components/trust-bar"
 import { getCollectionsWithProducts } from "@lib/data/collections"
 import { getRegion } from "@lib/data/regions"
 
+export const revalidate = 3600
+
 export const metadata: Metadata = {
   title: "Maro Shopping — Trinidad's Online Store",
   description:
