@@ -10,9 +10,9 @@
  *   MEILISEARCH_ADMIN_KEY
  */
 
-const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:9000"
-const MEILI_HOST = process.env.MEILISEARCH_HOST || "http://localhost:7700"
-const MEILI_KEY = process.env.MEILISEARCH_ADMIN_KEY || ""
+const BACKEND_URL = process.env.BACKEND_URL || process.env.BACKEND_PUBLIC_URL || process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000"
+const MEILI_HOST = process.env.MEILISEARCH_HOST || process.env.NEXT_PUBLIC_SEARCH_ENDPOINT || "http://localhost:7700"
+const MEILI_KEY = process.env.MEILISEARCH_ADMIN_KEY || process.env.NEXT_PUBLIC_SEARCH_API_KEY || ""
 const ADMIN_EMAIL = process.env.MEDUSA_ADMIN_EMAIL || ""
 const ADMIN_PASSWORD = process.env.MEDUSA_ADMIN_PASSWORD || ""
 const INDEX_NAME = "products"
