@@ -14,7 +14,6 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   images: {
-    unoptimized: true,
     remotePatterns: [
       {
         protocol: "http",
@@ -48,6 +47,11 @@ const nextConfig = {
         protocol: "https",
         hostname: process.env.NEXT_PUBLIC_R2_PUBLIC_URL.replace(/^https?:\/\//, ""),
       }] : []),
+      // Scraper portfolio bucket (products 011–025)
+      {
+        protocol: "https",
+        hostname: "pub-95e07a2abf694a409a97797859e96c75.r2.dev",
+      },
     ],
   },
   serverRuntimeConfig: {
