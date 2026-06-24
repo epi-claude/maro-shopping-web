@@ -50,6 +50,9 @@
     "tailwindcss-radix": "^2.8.0",
     "webpack": "^5.106.2"
   },
+  "pnpm": {
+    "onlyBuiltDependencies": ["sharp"]
+  },
   "devDependencies": {
     "@babel/core": "^7.28.6",
     "@medusajs/client-types": "preview",
