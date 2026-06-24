@@ -5,6 +5,10 @@ import StoreTemplate from "@modules/store/templates"
 
 export const revalidate = 3600
 
+export async function generateStaticParams() {
+  return [{ countryCode: "tt" }]
+}
+
 export const metadata: Metadata = {
   title: "Store",
   description: "Explore all of our products.",

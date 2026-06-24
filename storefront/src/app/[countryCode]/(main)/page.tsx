@@ -8,6 +8,10 @@ import { getRegion } from "@lib/data/regions"
 
 export const revalidate = 3600
 
+export async function generateStaticParams() {
+  return [{ countryCode: "tt" }]
+}
+
 export const metadata: Metadata = {
   title: "Maro Shopping — Trinidad's Online Store",
   description:
