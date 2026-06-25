@@ -73,7 +73,7 @@ export const getProductsList = cache(async function ({
         fields: "*variants.calculated_price",
         ...queryParams,
       },
-      { next: { tags: ["products"] } }
+      { next: { tags: ["products"], revalidate: 3600 } }
     )
     .then(({ products, count }) => {
       const nextPage = count > offset + limit ? pageParam + 1 : null
