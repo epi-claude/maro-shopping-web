@@ -105,6 +105,9 @@ export default function ProductActions({
       countryCode,
     })
 
+    // Tell the client-rendered nav cart button to re-fetch its count
+    window.dispatchEvent(new Event("cart:updated"))
+
     setIsAdding(false)
   }
 
