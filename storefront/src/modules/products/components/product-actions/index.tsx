@@ -2,7 +2,7 @@
 
 import { Button } from "@medusajs/ui"
 import { isEqual } from "lodash"
-import { useParams } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import { useEffect, useMemo, useRef, useState } from "react"
 
 import { useIntersection } from "@lib/hooks/use-in-view"
@@ -10,6 +10,7 @@ import Divider from "@modules/common/components/divider"
 import OptionSelect from "@modules/products/components/product-actions/option-select"
 
 import MobileActions from "./mobile-actions"
+import QuantitySelector from "./quantity-selector"
 import ProductPrice from "../product-price"
 import { addToCart } from "@lib/data/cart"
 import { HttpTypes } from "@medusajs/types"
@@ -35,8 +36,11 @@ export default function ProductActions({
   disabled,
 }: ProductActionsProps) {
   const [options, setOptions] = useState<Record<string, string | undefined>>({})
+  const [quantity, setQuantity] = useState(1)
   const [isAdding, setIsAdding] = useState(false)
+  const [isBuyingNow, setIsBuyingNow] = useState(false)
   const countryCode = useParams().countryCode as string
+  const router = useRouter()
 
   // If there is only 1 variant, preselect the options
   useEffect(() => {
@@ -56,6 +60,22 @@ export default function ProductActions({
       return isEqual(variantOptions, options)
     })
   }, [product.variants, options])
+
+  // reset quantity whenever the selected variant changes so a stale
+  // quantity from a different variant's inventory can't carry over
+  useEffect(() => {
+    setQuantity(1)
+  }, [selectedVariant?.id])
+
+  // the options the shopper still needs to pick (e.g. Color, Size) before
+  // a purchasable variant is resolved — drives both the disabled state and
+  // the button copy below
+  const missingOptions = useMemo(() => {
+    return (product.options || [])
+      .filter((o) => !options[o.title ?? ""])
+      .map((o) => o.title)
+      .filter((title): title is string => !!title)
+  }, [product.options, options])
 
   // update the options when a variant is selected
   const setOptionValue = (title: string, value: string) => {
@@ -89,6 +109,18 @@ export default function ProductActions({
     return false
   }, [selectedVariant])
 
+  // cap the quantity stepper at real stock when inventory is managed and
+  // backorders aren't allowed; otherwise fall back to a sane default ceiling
+  const maxQuantity = useMemo(() => {
+    if (
+      selectedVariant?.manage_inventory &&
+      !selectedVariant?.allow_backorder
+    ) {
+      return Math.max(1, Math.min(selectedVariant.inventory_quantity ?? 0, 99))
+    }
+    return 99
+  }, [selectedVariant])
+
   const actionsRef = useRef<HTMLDivElement>(null)
 
   const inView = useIntersection(actionsRef, "0px")
@@ -99,17 +131,47 @@ export default function ProductActions({
 
     setIsAdding(true)
 
-    await addToCart({
-      variantId: selectedVariant.id,
-      quantity: 1,
-      countryCode,
-    })
+    try {
+      await addToCart({
+        variantId: selectedVariant.id,
+        quantity,
+        countryCode,
+      })
 
-    // Tell the client-rendered nav cart button to re-fetch its count
-    window.dispatchEvent(new Event("cart:updated"))
-
-    setIsAdding(false)
+      // Tell the client-rendered nav cart button to re-fetch its count
+      window.dispatchEvent(new Event("cart:updated"))
+    } finally {
+      setIsAdding(false)
+    }
   }
+
+  // add the selected variant to the cart, then jump straight to checkout
+  const handleBuyNow = async () => {
+    if (!selectedVariant?.id) return null
+
+    setIsBuyingNow(true)
+
+    try {
+      await addToCart({
+        variantId: selectedVariant.id,
+        quantity,
+        countryCode,
+      })
+
+      window.dispatchEvent(new Event("cart:updated"))
+      router.push(`/${countryCode}/checkout`)
+    } finally {
+      setIsBuyingNow(false)
+    }
+  }
+
+  const addToCartLabel = !selectedVariant
+    ? missingOptions.length
+      ? `Select ${missingOptions.join(" & ")}`
+      : "Select variant"
+    : !inStock
+    ? "Out of stock"
+    : "Add to cart"
 
   return (
     <>
@@ -126,7 +188,7 @@ export default function ProductActions({
                       updateOption={setOptionValue}
                       title={option.title ?? ""}
                       data-testid="product-options"
-                      disabled={!!disabled || isAdding}
+                      disabled={!!disabled || isAdding || isBuyingNow}
                     />
                   </div>
                 )
@@ -136,32 +198,54 @@ export default function ProductActions({
           )}
         </div>
 
+        <QuantitySelector
+          quantity={quantity}
+          setQuantity={setQuantity}
+          max={maxQuantity}
+          disabled={!!disabled || isAdding || isBuyingNow}
+          data-testid="product-quantity"
+        />
+
         <ProductPrice product={product} variant={selectedVariant} />
 
-        <Button
-          onClick={handleAddToCart}
-          disabled={!inStock || !selectedVariant || !!disabled || isAdding}
-          variant="primary"
-          className="w-full h-10"
-          isLoading={isAdding}
-          data-testid="add-product-button"
-        >
-          {!selectedVariant
-            ? "Select variant"
-            : !inStock
-            ? "Out of stock"
-            : "Add to cart"}
-        </Button>
+        <div className="flex flex-col gap-y-2">
+          <Button
+            onClick={handleAddToCart}
+            disabled={!inStock || !selectedVariant || !!disabled || isAdding}
+            variant="primary"
+            className="w-full h-10"
+            isLoading={isAdding}
+            data-testid="add-product-button"
+          >
+            {addToCartLabel}
+          </Button>
+          <Button
+            onClick={handleBuyNow}
+            disabled={!inStock || !selectedVariant || !!disabled || isBuyingNow}
+            variant="secondary"
+            className="w-full h-10"
+            isLoading={isBuyingNow}
+            data-testid="buy-now-button"
+          >
+            Buy it now
+          </Button>
+        </div>
         <MobileActions
           product={product}
           variant={selectedVariant}
           options={options}
           updateOptions={setOptionValue}
+          quantity={quantity}
+          setQuantity={setQuantity}
+          maxQuantity={maxQuantity}
           inStock={inStock}
           handleAddToCart={handleAddToCart}
+          handleBuyNow={handleBuyNow}
           isAdding={isAdding}
+          isBuyingNow={isBuyingNow}
+          addToCartLabel={addToCartLabel}
           show={!inView}
-          optionsDisabled={!!disabled || isAdding}
+          optionsDisabled={!!disabled || isAdding || isBuyingNow}
         />
       </div>
     </>

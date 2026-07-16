@@ -8,6 +8,7 @@ import X from "@modules/common/icons/x"
 
 import { getProductPrice } from "@lib/util/get-product-price"
 import OptionSelect from "./option-select"
+import QuantitySelector from "./quantity-selector"
 import { HttpTypes } from "@medusajs/types"
 
 type MobileActionsProps = {
@@ -15,9 +16,15 @@ type MobileActionsProps = {
   variant?: HttpTypes.StoreProductVariant
   options: Record<string, string | undefined>
   updateOptions: (title: string, value: string) => void
+  quantity: number
+  setQuantity: (quantity: number) => void
+  maxQuantity: number
   inStock?: boolean
   handleAddToCart: () => void
+  handleBuyNow: () => void
   isAdding?: boolean
+  isBuyingNow?: boolean
+  addToCartLabel: string
   show: boolean
   optionsDisabled: boolean
 }
@@ -27,13 +34,29 @@ const MobileActions: React.FC<MobileActionsProps> = ({
   variant,
   options,
   updateOptions,
+  quantity,
+  setQuantity,
+  maxQuantity,
   inStock,
   handleAddToCart,
+  handleBuyNow,
   isAdding,
+  isBuyingNow,
+  addToCartLabel,
   show,
   optionsDisabled,
 }) => {
   const { state, open, close } = useToggleState()
+
+  const onAddToCart = async () => {
+    await handleAddToCart()
+    close()
+  }
+
+  const onBuyNow = async () => {
+    await handleBuyNow()
+    close()
+  }
 
   const price = getProductPrice({
     product: product,
@@ -118,11 +141,7 @@ const MobileActions: React.FC<MobileActionsProps> = ({
                 isLoading={isAdding}
                 data-testid="mobile-cart-button"
               >
-                {!variant
-                  ? "Select variant"
-                  : !inStock
-                  ? "Out of stock"
-                  : "Add to cart"}
+                {addToCartLabel}
               </Button>
             </div>
           </div>
@@ -166,7 +185,7 @@ const MobileActions: React.FC<MobileActionsProps> = ({
                       <X />
                     </button>
                   </div>
-                  <div className="bg-white px-6 py-12">
+                  <div className="bg-white px-6 py-12 flex flex-col gap-y-6">
                     {(product.variants?.length ?? 0) > 1 && (
                       <div className="flex flex-col gap-y-6">
                         {(product.options || []).map((option) => {
@@ -184,6 +203,34 @@ const MobileActions: React.FC<MobileActionsProps> = ({
                         })}
                       </div>
                     )}
+                    <QuantitySelector
+                      quantity={quantity}
+                      setQuantity={setQuantity}
+                      max={maxQuantity}
+                      disabled={optionsDisabled}
+                      data-testid="mobile-product-quantity"
+                    />
+                    <div className="flex flex-col gap-y-2">
+                      <Button
+                        onClick={onAddToCart}
+                        disabled={!inStock || !variant || optionsDisabled}
+                        className="w-full"
+                        isLoading={isAdding}
+                        data-testid="mobile-cart-button-expanded"
+                      >
+                        {addToCartLabel}
+                      </Button>
+                      <Button
+                        onClick={onBuyNow}
+                        variant="secondary"
+                        disabled={!inStock || !variant || optionsDisabled}
+                        className="w-full"
+                        isLoading={isBuyingNow}
+                        data-testid="mobile-buy-now-button"
+                      >
+                        Buy it now
+                      </Button>
+                    </div>
                   </div>
                 </Dialog.Panel>
               </Transition.Child>

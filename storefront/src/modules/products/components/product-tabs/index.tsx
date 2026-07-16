@@ -11,17 +11,24 @@ type ProductTabsProps = {
   product: HttpTypes.StoreProduct
 }
 
+const getSizeOption = (product: HttpTypes.StoreProduct) =>
+  product.options?.find(
+    (o) => o.title?.toLowerCase() === "size" && o.values?.length
+  )
+
 const ProductTabs = ({ product }: ProductTabsProps) => {
+  const sizeOption = getSizeOption(product)
+
   const tabs = [
-    {
+    sizeOption && {
       label: "Product Information",
-      component: <ProductInfoTab product={product} />,
+      component: <ProductInfoTab sizeOption={sizeOption} />,
     },
     {
       label: "Shipping & Returns",
       component: <ShippingInfoTab />,
     },
-  ]
+  ].filter(Boolean) as { label: string; component: JSX.Element }[]
 
   return (
     <div className="w-full">
@@ -41,18 +48,16 @@ const ProductTabs = ({ product }: ProductTabsProps) => {
   )
 }
 
-const ProductInfoTab = ({ product }: ProductTabsProps) => {
-  const sizeOption = product.options?.find(
-    (o) => o.title?.toLowerCase() === "size"
-  )
-
-  if (!sizeOption?.values?.length) return null
-
+const ProductInfoTab = ({
+  sizeOption,
+}: {
+  sizeOption: HttpTypes.StoreProductOption
+}) => {
   return (
     <div className="text-small-regular py-8">
       <div>
         <span className="font-semibold">Size</span>
-        <p>{sizeOption.values.map((v) => v.value).join(", ")}</p>
+        <p>{sizeOption.values!.map((v) => v.value).join(", ")}</p>
       </div>
     </div>
   )
