@@ -1,5 +1,20 @@
 import { loadEnv, Modules, defineConfig } from '@medusajs/utils';
-import {
+
+let constantsModule;
+let customModules;
+try {
+  constantsModule = require('lib/constants');
+  customModules = require('./src/config/custom-modules').default;
+} catch (e) {
+  // Medusa's own config loader silently swallows errors thrown while loading
+  // this file during `medusa build` (throwOnError: false), which surfaces
+  // only as a confusing downstream "Cannot read properties of null (reading
+  // 'admin')". Log the real cause loudly before it gets discarded.
+  console.error('[medusa-config] FATAL error loading local modules:', e);
+  throw e;
+}
+
+const {
   ADMIN_CORS,
   AUTH_CORS,
   BACKEND_URL,
@@ -12,8 +27,7 @@ import {
   WORKER_MODE,
   MEILISEARCH_HOST,
   MEILISEARCH_ADMIN_KEY
-} from 'lib/constants';
-import customModules from './src/config/custom-modules';
+} = constantsModule;
 
 loadEnv(process.env.NODE_ENV, process.cwd());
 
