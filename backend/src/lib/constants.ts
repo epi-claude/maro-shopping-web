@@ -5,6 +5,15 @@ import { assertValue } from 'utils/assert-value'
 loadEnv(process.env.NODE_ENV || 'development', process.cwd())
 
 /**
+ * `medusa build` only compiles the admin dashboard and server bundle — it never
+ * connects to Postgres/Redis or signs anything. Some hosting build environments
+ * (e.g. Railway's build sandbox) don't expose the same secrets available at
+ * runtime, so the fail-fast checks below are skipped in that context and
+ * enforced only for commands that actually run the server (start/exec).
+ */
+const isBuildCommand = process.argv.includes('build')
+
+/**
  * Is development environment
  */
 export const IS_DEV = process.env.NODE_ENV === 'development'
@@ -17,10 +26,12 @@ export const BACKEND_URL = process.env.BACKEND_PUBLIC_URL ?? process.env.RAILWAY
 /**
  * Database URL for Postgres instance used by the backend
  */
-export const DATABASE_URL = assertValue(
-  process.env.DATABASE_URL,
-  'Environment variable for DATABASE_URL is not set',
-)
+export const DATABASE_URL = isBuildCommand
+  ? process.env.DATABASE_URL ?? ''
+  : assertValue(
+      process.env.DATABASE_URL,
+      'Environment variable for DATABASE_URL is not set',
+    )
 
 /**
  * (optional) Redis URL for Redis instance used by the backend
@@ -45,18 +56,22 @@ export const STORE_CORS = process.env.STORE_CORS;
 /**
  * JWT Secret used for signing JWT tokens
  */
-export const JWT_SECRET = assertValue(
-  process.env.JWT_SECRET,
-  'Environment variable for JWT_SECRET is not set',
-)
+export const JWT_SECRET = isBuildCommand
+  ? process.env.JWT_SECRET ?? ''
+  : assertValue(
+      process.env.JWT_SECRET,
+      'Environment variable for JWT_SECRET is not set',
+    )
 
 /**
  * Cookie secret used for signing cookies
  */
-export const COOKIE_SECRET = assertValue(
-  process.env.COOKIE_SECRET,
-  'Environment variable for COOKIE_SECRET is not set',
-)
+export const COOKIE_SECRET = isBuildCommand
+  ? process.env.COOKIE_SECRET ?? ''
+  : assertValue(
+      process.env.COOKIE_SECRET,
+      'Environment variable for COOKIE_SECRET is not set',
+    )
 
 /**
  * (optional) Cloudflare R2 configuration for file storage

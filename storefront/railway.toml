@@ -1,6 +1,8 @@
 [build]
   builder = "nixpacks"
-  buildCommand = "npm run build"
+  # rm -rf guards against a stale/corrupted persistent .next cache mount causing
+  # false "Module not found" webpack errors for files that genuinely exist.
+  buildCommand = "rm -rf .next/cache node_modules/.cache && npm run build"
 
 [deploy]
   startCommand = "npm run start"
