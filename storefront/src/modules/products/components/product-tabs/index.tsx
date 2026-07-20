@@ -11,18 +11,20 @@ type ProductTabsProps = {
   product: HttpTypes.StoreProduct
 }
 
-const getSizeOption = (product: HttpTypes.StoreProduct) =>
-  product.options?.find(
-    (o) => o.title?.toLowerCase() === "size" && o.values?.length
+const hasProductInfo = (product: HttpTypes.StoreProduct) =>
+  Boolean(
+    product.material ||
+      product.origin_country ||
+      product.type?.value ||
+      product.weight ||
+      (product.length && product.width && product.height)
   )
 
 const ProductTabs = ({ product }: ProductTabsProps) => {
-  const sizeOption = getSizeOption(product)
-
   const tabs = [
-    sizeOption && {
+    hasProductInfo(product) && {
       label: "Product Information",
-      component: <ProductInfoTab sizeOption={sizeOption} />,
+      component: <ProductInfoTab product={product} />,
     },
     {
       label: "Shipping & Returns",
@@ -48,16 +50,38 @@ const ProductTabs = ({ product }: ProductTabsProps) => {
   )
 }
 
-const ProductInfoTab = ({
-  sizeOption,
-}: {
-  sizeOption: HttpTypes.StoreProductOption
-}) => {
+const ProductInfoTab = ({ product }: ProductTabsProps) => {
   return (
     <div className="text-small-regular py-8">
-      <div>
-        <span className="font-semibold">Size</span>
-        <p>{sizeOption.values!.map((v) => v.value).join(", ")}</p>
+      <div className="grid grid-cols-2 gap-x-8">
+        <div className="flex flex-col gap-y-4">
+          <div>
+            <span className="font-semibold">Material</span>
+            <p>{product.material ? product.material : "-"}</p>
+          </div>
+          <div>
+            <span className="font-semibold">Country of origin</span>
+            <p>{product.origin_country ? product.origin_country : "-"}</p>
+          </div>
+          <div>
+            <span className="font-semibold">Type</span>
+            <p>{product.type ? product.type.value : "-"}</p>
+          </div>
+        </div>
+        <div className="flex flex-col gap-y-4">
+          <div>
+            <span className="font-semibold">Weight</span>
+            <p>{product.weight ? `${product.weight} g` : "-"}</p>
+          </div>
+          <div>
+            <span className="font-semibold">Dimensions</span>
+            <p>
+              {product.length && product.width && product.height
+                ? `${product.length}L x ${product.width}W x ${product.height}H`
+                : "-"}
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   )
