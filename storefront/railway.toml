@@ -10,3 +10,8 @@
   healthcheckTimeout = 30
   restartPolicyType = "on_failure"
   restartPolicyMaxRetries = 3
+  # us-west2's Metal builder pool ("builder-fnerwo") has been stuck at the
+  # "scheduling build" stage for every attempt since 2026-07-20 18:40 UTC.
+  # Backend deploys fine on us-east4-eqdc4a, so pin storefront to the same
+  # healthy region/builder pool.
+  region = "us-east4-eqdc4a"

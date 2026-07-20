@@ -20,7 +20,9 @@ export class CodPaymentService extends AbstractPaymentProvider {
   }
 
   async authorizePayment(input: AuthorizePaymentInput): Promise<AuthorizePaymentOutput> {
-    return { status: 'pending', data: input.data ?? {} }
+    // Order is authorized to proceed immediately; actual cash is only
+    // collected on delivery, so capture stays a separate, later step.
+    return { status: 'authorized', data: input.data ?? {} }
   }
 
   async capturePayment(input: CapturePaymentInput): Promise<CapturePaymentOutput> {

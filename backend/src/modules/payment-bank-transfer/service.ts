@@ -43,8 +43,9 @@ export class BankTransferPaymentService extends AbstractPaymentProvider<BankTran
   }
 
   async authorizePayment(input: AuthorizePaymentInput): Promise<AuthorizePaymentOutput> {
-    // Stays pending until admin manually captures after confirming the deposit
-    return { status: 'pending', data: input.data ?? {} }
+    // Order is authorized to proceed immediately; capture stays a separate,
+    // later step admin performs manually after confirming the deposit.
+    return { status: 'authorized', data: input.data ?? {} }
   }
 
   async capturePayment(input: CapturePaymentInput): Promise<CapturePaymentOutput> {
