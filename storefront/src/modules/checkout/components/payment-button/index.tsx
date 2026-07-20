@@ -9,7 +9,7 @@ import ErrorMessage from "../error-message"
 import Spinner from "@modules/common/icons/spinner"
 import { placeOrder } from "@lib/data/cart"
 import { HttpTypes } from "@medusajs/types"
-import { isManual, isPaypal, isStripe } from "@lib/constants"
+import { isBankTransfer, isCod, isManual, isPaypal, isStripe } from "@lib/constants"
 
 type PaymentButtonProps = {
   cart: HttpTypes.StoreCart
@@ -47,8 +47,10 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
         />
       )
     case isManual(paymentSession?.provider_id):
+    case isCod(paymentSession?.provider_id):
+    case isBankTransfer(paymentSession?.provider_id):
       return (
-        <ManualTestPaymentButton notReady={notReady} data-testid={dataTestId} />
+        <ManualPaymentButton notReady={notReady} data-testid={dataTestId} />
       )
     case isPaypal(paymentSession?.provider_id):
       return (
@@ -259,7 +261,7 @@ const PayPalPaymentButton = ({
   }
 }
 
-const ManualTestPaymentButton = ({ notReady }: { notReady: boolean }) => {
+const ManualPaymentButton = ({ notReady }: { notReady: boolean }) => {
   const [submitting, setSubmitting] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
