@@ -12,9 +12,17 @@ export default async function orderPlacedHandler({
   const query = container.resolve(ContainerRegistrationKeys.QUERY)
 
   const order = await orderModuleService.retrieveOrder(data.id, {
-    relations: ['items', 'summary', 'shipping_address'],
+    relations: ['items', 'summary', 'shipping_address', 'shipping_methods'],
   })
   const shippingAddress = await (orderModuleService as any).orderAddressService_.retrieve(order.shipping_address.id)
+
+  // order.total/subtotal/shipping_total aren't populated by retrieveOrder, so
+  // derive the breakdown from items + shipping_methods + the summary's total
+  // (which IS reliable) rather than from those unpopulated fields.
+  const itemsSubtotal = order.items.reduce((sum, item) => sum + item.unit_price * item.quantity, 0)
+  const shippingTotal = (order.shipping_methods ?? []).reduce((sum, method) => sum + Number(method.amount), 0)
+  const grandTotal = Number(order.summary.raw_current_order_total.value)
+  const taxTotal = grandTotal - itemsSubtotal - shippingTotal
 
   // payment_collections isn't a direct MikroORM relation on the order entity
   // (it's a module link), so it has to go through the query graph rather
@@ -44,6 +52,10 @@ export default async function orderPlacedHandler({
         order,
         shippingAddress,
         bankDetails,
+        itemsSubtotal,
+        shippingTotal,
+        taxTotal,
+        grandTotal,
         preview: 'Thank you for your order!'
       }
     })
