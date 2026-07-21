@@ -1,6 +1,6 @@
 import { Container, Heading, Text } from "@medusajs/ui"
 
-import { isStripe, paymentInfoMap } from "@lib/constants"
+import { isBankTransfer, isStripe, paymentInfoMap } from "@lib/constants"
 import Divider from "@modules/common/components/divider"
 import { convertToLocale } from "@lib/util/money"
 import { HttpTypes } from "@medusajs/types"
@@ -11,6 +11,10 @@ type PaymentDetailsProps = {
 
 const PaymentDetails = ({ order }: PaymentDetailsProps) => {
   const payment = order.payment_collections?.[0].payments?.[0]
+  const bankDetails =
+    payment && isBankTransfer(payment.provider_id)
+      ? (payment.data?.bank_details as Record<string, string> | undefined)
+      : undefined
 
   return (
     <div>
@@ -51,6 +55,38 @@ const PaymentDetails = ({ order }: PaymentDetailsProps) => {
                 </Text>
               </div>
             </div>
+          </div>
+        )}
+        {bankDetails && (
+          <div className="flex flex-col w-full mt-4 gap-y-1">
+            <Text className="txt-medium-plus text-ui-fg-base mb-1">
+              Bank transfer instructions
+            </Text>
+            <Text className="txt-medium text-ui-fg-subtle">
+              Bank: {bankDetails.bank_name}
+            </Text>
+            {bankDetails.bank_address && (
+              <Text className="txt-medium text-ui-fg-subtle">
+                Bank Address: {bankDetails.bank_address}
+              </Text>
+            )}
+            <Text className="txt-medium text-ui-fg-subtle">
+              Account Name: {bankDetails.account_name}
+            </Text>
+            <Text className="txt-medium text-ui-fg-subtle">
+              Account Number: {bankDetails.account_number}
+            </Text>
+            <Text className="txt-medium text-ui-fg-subtle">
+              Routing/ABA Number: {bankDetails.routing_number}
+            </Text>
+            {bankDetails.account_type && (
+              <Text className="txt-medium text-ui-fg-subtle">
+                Account Type: {bankDetails.account_type}
+              </Text>
+            )}
+            <Text className="txt-medium text-ui-fg-subtle mt-2">
+              {bankDetails.instructions}
+            </Text>
           </div>
         )}
       </div>

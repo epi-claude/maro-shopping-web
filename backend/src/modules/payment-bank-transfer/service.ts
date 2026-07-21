@@ -14,9 +14,11 @@ import {
 
 interface BankTransferOptions {
   bank_name: string
+  bank_address: string
   account_name: string
   account_number: string
   routing_number: string
+  account_type: string
   instructions: string
 }
 
@@ -33,9 +35,11 @@ export class BankTransferPaymentService extends AbstractPaymentProvider<BankTran
         // Bank details surfaced to storefront so checkout can display them
         bank_details: {
           bank_name: this.config.bank_name,
+          bank_address: this.config.bank_address,
           account_name: this.config.account_name,
           account_number: this.config.account_number,
           routing_number: this.config.routing_number,
+          account_type: this.config.account_type,
           instructions: this.config.instructions,
         },
       },

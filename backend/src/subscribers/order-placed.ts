@@ -10,8 +10,15 @@ export default async function orderPlacedHandler({
   const notificationModuleService: INotificationModuleService = container.resolve(Modules.NOTIFICATION)
   const orderModuleService: IOrderModuleService = container.resolve(Modules.ORDER)
   
-  const order = await orderModuleService.retrieveOrder(data.id, { relations: ['items', 'summary', 'shipping_address'] })
+  const order = await orderModuleService.retrieveOrder(data.id, {
+    relations: ['items', 'summary', 'shipping_address', 'payment_collections.payments'],
+  })
   const shippingAddress = await (orderModuleService as any).orderAddressService_.retrieve(order.shipping_address.id)
+
+  const payment = (order as any).payment_collections?.[0]?.payments?.[0]
+  const bankDetails = payment?.provider_id?.startsWith('pp_bank-transfer_')
+    ? (payment.data?.bank_details as Record<string, string>)
+    : undefined
 
   try {
     await notificationModuleService.createNotifications({
@@ -25,6 +32,7 @@ export default async function orderPlacedHandler({
         },
         order,
         shippingAddress,
+        bankDetails,
         preview: 'Thank you for your order!'
       }
     })

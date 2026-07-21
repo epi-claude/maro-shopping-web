@@ -23,9 +23,11 @@ export const paymentProviders: object[] = [
     id: 'bank-transfer',
     options: {
       bank_name: process.env.BANK_TRANSFER_BANK_NAME || 'Republic Bank',
+      bank_address: process.env.BANK_TRANSFER_BANK_ADDRESS || '',
       account_name: process.env.BANK_TRANSFER_ACCOUNT_NAME || 'Maro Shopping Ltd',
       account_number: process.env.BANK_TRANSFER_ACCOUNT_NUMBER || '',
       routing_number: process.env.BANK_TRANSFER_ROUTING_NUMBER || '',
+      account_type: process.env.BANK_TRANSFER_ACCOUNT_TYPE || '',
       instructions: process.env.BANK_TRANSFER_INSTRUCTIONS || 'Use your order number as the payment reference.',
     },
   },

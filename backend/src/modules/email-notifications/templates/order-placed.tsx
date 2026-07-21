@@ -5,14 +5,26 @@ import { OrderDTO, OrderAddressDTO } from '@medusajs/framework/types'
 
 export const ORDER_PLACED = 'order-placed'
 
+interface BankDetails {
+  bank_name: string
+  bank_address: string
+  account_name: string
+  account_number: string
+  routing_number: string
+  account_type: string
+  instructions: string
+}
+
 interface OrderPlacedPreviewProps {
   order: OrderDTO & { display_id: string; summary: { raw_current_order_total: { value: number } } }
   shippingAddress: OrderAddressDTO
+  bankDetails?: BankDetails
 }
 
 export interface OrderPlacedTemplateProps {
   order: OrderDTO & { display_id: string; summary: { raw_current_order_total: { value: number } } }
   shippingAddress: OrderAddressDTO
+  bankDetails?: BankDetails
   preview?: string
 }
 
@@ -21,7 +33,7 @@ export const isOrderPlacedTemplateData = (data: any): data is OrderPlacedTemplat
 
 export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
   PreviewProps: OrderPlacedPreviewProps
-} = ({ order, shippingAddress, preview = 'Your order has been placed!' }) => {
+} = ({ order, shippingAddress, bankDetails, preview = 'Your order has been placed!' }) => {
   return (
     <Base preview={preview}>
       <Section>
@@ -101,6 +113,44 @@ export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
             </div>
           ))}
         </div>
+
+        {bankDetails && (
+          <>
+            <Hr style={{ margin: '20px 0' }} />
+
+            <Text style={{ fontSize: '18px', fontWeight: 'bold', margin: '0 0 10px' }}>
+              Bank Transfer Details
+            </Text>
+            <Text style={{ margin: '0 0 15px' }}>
+              Please complete your payment using the details below. Use your order ID ({order.display_id}) as the payment reference.
+            </Text>
+            <Text style={{ margin: '0 0 5px' }}>
+              Bank: {bankDetails.bank_name}
+            </Text>
+            {bankDetails.bank_address && (
+              <Text style={{ margin: '0 0 5px' }}>
+                Bank Address: {bankDetails.bank_address}
+              </Text>
+            )}
+            <Text style={{ margin: '0 0 5px' }}>
+              Account Name: {bankDetails.account_name}
+            </Text>
+            <Text style={{ margin: '0 0 5px' }}>
+              Account Number: {bankDetails.account_number}
+            </Text>
+            <Text style={{ margin: '0 0 5px' }}>
+              Routing/ABA Number: {bankDetails.routing_number}
+            </Text>
+            {bankDetails.account_type && (
+              <Text style={{ margin: '0 0 5px' }}>
+                Account Type: {bankDetails.account_type}
+              </Text>
+            )}
+            <Text style={{ margin: '15px 0 0' }}>
+              {bankDetails.instructions}
+            </Text>
+          </>
+        )}
       </Section>
     </Base>
   )
