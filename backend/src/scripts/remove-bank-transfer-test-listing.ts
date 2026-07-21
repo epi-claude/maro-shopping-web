@@ -1,5 +1,5 @@
 import { ExecArgs } from "@medusajs/framework/types";
-import { ContainerRegistrationKeys } from "@medusajs/framework/utils";
+import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils";
 import {
   deleteProductsWorkflow,
   deleteShippingOptionsWorkflow,
@@ -17,13 +17,25 @@ const SHIPPING_OPTION_NAME = "Free Shipping";
 export default async function removeBankTransferTestListing({ container }: ExecArgs) {
   const logger = container.resolve(ContainerRegistrationKeys.LOGGER);
   const query = container.resolve(ContainerRegistrationKeys.QUERY);
+  const inventoryModule = container.resolve(Modules.INVENTORY);
 
   const { data: products } = await query.graph({
     entity: "product",
-    fields: ["id", "handle"],
+    fields: ["id", "handle", "variants.inventory_items.inventory_item_id"],
     filters: { handle: PRODUCT_HANDLE },
   });
   if (products.length) {
+    const inventoryItemIds = products[0].variants.flatMap((v: any) =>
+      v.inventory_items.map((i: any) => i.inventory_item_id)
+    );
+    const reservations = await inventoryModule.listReservationItems({
+      inventory_item_id: inventoryItemIds,
+    });
+    if (reservations.length) {
+      await inventoryModule.deleteReservationItems(reservations.map((r: any) => r.id));
+      logger.info(`DELETED_RESERVATIONS: ${JSON.stringify(reservations.map((r: any) => r.id))}`);
+    }
+
     await deleteProductsWorkflow(container).run({
       input: { ids: products.map((p: any) => p.id) },
     });
