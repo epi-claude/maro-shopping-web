@@ -4,6 +4,8 @@ import { isBankTransfer, isStripe, paymentInfoMap } from "@lib/constants"
 import Divider from "@modules/common/components/divider"
 import { convertToLocale } from "@lib/util/money"
 import { HttpTypes } from "@medusajs/types"
+import CopyField from "./copy-field"
+import PaymentProofUpload from "../payment-proof-upload"
 
 type PaymentDetailsProps = {
   order: HttpTypes.StoreOrder
@@ -58,35 +60,57 @@ const PaymentDetails = ({ order }: PaymentDetailsProps) => {
           </div>
         )}
         {bankDetails && (
-          <div className="flex flex-col w-full mt-4 gap-y-1">
-            <Text className="txt-medium-plus text-ui-fg-base mb-1">
+          <div className="flex flex-col w-full mt-4 gap-y-3">
+            <Text className="txt-medium-plus text-ui-fg-base">
               Bank transfer instructions
             </Text>
-            <Text className="txt-medium text-ui-fg-subtle">
-              Bank: {bankDetails.bank_name}
+            <Text className="txt-small text-ui-fg-subtle">
+              Tap any field below to copy it, then switch to your banking app
+              to pay.
             </Text>
-            {bankDetails.bank_address && (
-              <Text className="txt-medium text-ui-fg-subtle">
-                Bank Address: {bankDetails.bank_address}
+            <div className="flex flex-col gap-y-2">
+              <CopyField label="Bank" value={bankDetails.bank_name} />
+              {bankDetails.bank_address && (
+                <CopyField
+                  label="Bank address"
+                  value={bankDetails.bank_address}
+                />
+              )}
+              <CopyField
+                label="Account name"
+                value={bankDetails.account_name}
+              />
+              <CopyField
+                label="Account number"
+                value={bankDetails.account_number}
+                monospace
+              />
+              <CopyField
+                label="Routing/ABA number"
+                value={bankDetails.routing_number}
+                monospace
+              />
+              {bankDetails.account_type && (
+                <CopyField
+                  label="Account type"
+                  value={bankDetails.account_type}
+                />
+              )}
+              <CopyField
+                label="Payment reference"
+                value={String(order.display_id ?? order.id)}
+                monospace
+              />
+            </div>
+            {bankDetails.instructions && (
+              <Text className="txt-medium text-ui-fg-subtle mt-1">
+                {bankDetails.instructions}
               </Text>
             )}
-            <Text className="txt-medium text-ui-fg-subtle">
-              Account Name: {bankDetails.account_name}
-            </Text>
-            <Text className="txt-medium text-ui-fg-subtle">
-              Account Number: {bankDetails.account_number}
-            </Text>
-            <Text className="txt-medium text-ui-fg-subtle">
-              Routing/ABA Number: {bankDetails.routing_number}
-            </Text>
-            {bankDetails.account_type && (
-              <Text className="txt-medium text-ui-fg-subtle">
-                Account Type: {bankDetails.account_type}
-              </Text>
-            )}
-            <Text className="txt-medium text-ui-fg-subtle mt-2">
-              {bankDetails.instructions}
-            </Text>
+            <PaymentProofUpload
+              orderId={order.id}
+              initialStatus={order.metadata?.payment_proof_status as string}
+            />
           </div>
         )}
       </div>

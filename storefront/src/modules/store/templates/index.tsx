@@ -7,12 +7,16 @@ import { SortOptions } from "@modules/store/components/refinement-list/sort-prod
 import PaginatedProducts from "./paginated-products"
 
 const StoreTemplate = ({
+  sortBy,
+  page,
   countryCode,
 }: {
+  sortBy?: SortOptions
+  page?: string
   countryCode: string
 }) => {
-  const pageNumber = 1
-  const sort: SortOptions = "created_at"
+  const pageNumber = page ? parseInt(page) : 1
+  const sort = sortBy || "created_at"
 
   return (
     <div
