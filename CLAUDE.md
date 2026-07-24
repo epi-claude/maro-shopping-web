@@ -11,6 +11,7 @@ github.com/epi-claude/maro-shopping-web
 ## Railway project
 Maro Shopping Web
 Services: backend, storefront, postgres, redis, meilisearch
+Note: the backend's actual Railway service name is `maro-shopping-web` (not `backend` — that's just the `railway.toml` key). Use `maro-shopping-web` with `railway` CLI commands (`--service maro-shopping-web`).
 
 ## Stack
 | Layer | Technology |
@@ -39,6 +40,7 @@ Services: backend, storefront, postgres, redis, meilisearch
 - CORS values are comma-separated strings — no spaces between entries
 - Resend sending address must use verified domain: notify.e-dmm.com
 - Cloudflare R2 requires `additional_client_config: { forcePathStyle: true }` in the S3 provider config
+- All monetary `amount` fields (prices, totals, shipping costs) are stored in the currency's **minor unit** (e.g. cents), not major/decimal dollars — e.g. `unit_price: 47300` means $473.00. Always divide by 100 when displaying, and remember this when writing a one-off script that sets a price directly (`amount: 1` creates a $0.01 price, not $1.00).
 
 ## Local development
 ```bash
@@ -56,9 +58,22 @@ npm install && npm run dev
 # Local
 cd backend && npx medusa db:migrate
 
-# Production (Railway CLI)
-railway run --service backend npx medusa db:migrate
+# Production — see "Running one-off scripts against production" below;
+# `railway run` does NOT work here since DATABASE_URL uses the
+# internal-only *.railway.internal hostname.
+railway ssh --service maro-shopping-web "npx medusa db:migrate"
 ```
 
+## Running one-off scripts against production
+`railway run --service maro-shopping-web ...` fails: `DATABASE_URL`/`REDIS_URL`/`MEILISEARCH_HOST` all resolve to internal-only `*.railway.internal` hostnames unreachable from outside Railway's network. Instead, write the script under `backend/src/scripts/`, then push it into the already-running container and execute it in one shot (no deploy needed, since the container already has `node_modules`/the Medusa CLI):
+```bash
+SCRIPT_CONTENT=$(cat backend/src/scripts/<name>.ts)
+railway ssh --service maro-shopping-web "cat > src/scripts/<name>.ts << 'EOF'
+$SCRIPT_CONTENT
+EOF
+npx medusa exec ./src/scripts/<name>.ts"
+```
+Commit + push the finished script afterward so the repo matches what actually ran in production.
+
 ## Deployment
-Push to main → Railway auto-deploys both services via railway.toml.
+Push to `master` → Railway auto-deploys both services via railway.toml.
