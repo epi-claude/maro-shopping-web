@@ -1,8 +1,11 @@
 [build]
   builder = "nixpacks"
-  # rm -rf guards against a stale/corrupted persistent .next cache mount causing
-  # false "Module not found" webpack errors for files that genuinely exist.
-  buildCommand = "rm -rf .next/cache node_modules/.cache && npm run build"
+  # rm -rf */* (not the dirs themselves) guards against a stale/corrupted
+  # persistent .next cache mount causing false "Module not found" webpack
+  # errors for files that genuinely exist. These paths are live BuildKit
+  # cache mounts at build time, so removing the mount point itself fails
+  # with "Device or resource busy" — only their contents can be cleared.
+  buildCommand = "rm -rf .next/cache/* node_modules/.cache/* && npm run build"
 
 [deploy]
   startCommand = "npm run start"
