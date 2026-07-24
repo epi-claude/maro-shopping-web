@@ -8,6 +8,17 @@ import Spinner from "@modules/common/icons/spinner"
 const MEDUSA_BACKEND_URL =
   process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000"
 
+// Keep in sync with the multer config in backend/src/api/middlewares.ts
+const MAX_FILE_SIZE_BYTES = 8 * 1024 * 1024
+const ALLOWED_MIME_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/heic",
+  "image/heif",
+]
+const ACCEPTED_FORMATS_LABEL = "JPEG, PNG, WEBP, or HEIC"
+
 type PaymentProofUploadProps = {
   orderId: string
   initialStatus?: string
@@ -32,6 +43,25 @@ const PaymentProofUpload = ({
     }
 
     setError(null)
+
+    if (!ALLOWED_MIME_TYPES.includes(file.type)) {
+      setError(
+        `That file type isn't supported. Please upload a ${ACCEPTED_FORMATS_LABEL} image.`
+      )
+      if (inputRef.current) {
+        inputRef.current.value = ""
+      }
+      return
+    }
+
+    if (file.size > MAX_FILE_SIZE_BYTES) {
+      setError("That image is too large. Please upload a file under 8MB.")
+      if (inputRef.current) {
+        inputRef.current.value = ""
+      }
+      return
+    }
+
     setStatus("uploading")
 
     const formData = new FormData()
@@ -57,7 +87,9 @@ const PaymentProofUpload = ({
       setStatus("uploaded")
     } catch {
       setStatus("idle")
-      setError("We couldn't upload that screenshot. Please try again.")
+      setError(
+        "We couldn't upload that screenshot. Check your connection and try again."
+      )
     } finally {
       if (inputRef.current) {
         inputRef.current.value = ""
@@ -111,13 +143,16 @@ const PaymentProofUpload = ({
         ref={inputRef}
         id="payment-proof-upload"
         type="file"
-        accept="image/*"
+        accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
         capture="environment"
         className="hidden"
         disabled={status === "uploading"}
         onChange={handleFileChange}
         data-testid="payment-proof-input"
       />
+      <Text className="txt-small text-ui-fg-subtle text-center">
+        {ACCEPTED_FORMATS_LABEL} — up to 8MB
+      </Text>
       {error && (
         <Text className="txt-small text-ui-fg-error">{error}</Text>
       )}
