@@ -75,5 +75,7 @@ npx medusa exec ./src/scripts/<name>.ts"
 ```
 Commit + push the finished script afterward so the repo matches what actually ran in production.
 
+`npx medusa exec <script> <args>` parses `<args>` with its own yargs instance, which rejects any `--flag`-style argument outright (`Unknown argument`) — even after a literal `--` separator. If a script needs a flag (e.g. a dry-run/commit toggle), use plain words (`commit`, `force`) and check `args.includes('commit')`, not `args.includes('--commit')`.
+
 ## Deployment
 Push to `master` → Railway auto-deploys both services via railway.toml.
