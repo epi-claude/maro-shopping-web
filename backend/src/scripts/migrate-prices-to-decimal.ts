@@ -5,10 +5,10 @@ import { ExecArgs } from '@medusajs/framework/types'
 // convention, so `amount: 590` means $590.00 everywhere, matching the stock
 // Admin dashboard's own assumption (see CLAUDE.md).
 //
-// Usage:
-//   npx medusa exec ./src/scripts/migrate-prices-to-decimal.ts            (dry run, default)
-//   npx medusa exec ./src/scripts/migrate-prices-to-decimal.ts --commit   (writes for real)
-//   npx medusa exec ./src/scripts/migrate-prices-to-decimal.ts --commit --force  (re-run after already committed)
+// Usage (medusa exec's arg parser rejects "--"-prefixed flags, so plain words):
+//   npx medusa exec ./src/scripts/migrate-prices-to-decimal.ts          (dry run, default)
+//   npx medusa exec ./src/scripts/migrate-prices-to-decimal.ts commit   (writes for real)
+//   npx medusa exec ./src/scripts/migrate-prices-to-decimal.ts commit force  (re-run after already committed)
 //
 // Every Medusa v2 money column has a companion `raw_<col>` jsonb shadow
 // column shaped like {"value": "<string>", "precision": 20} - both the plain
@@ -62,8 +62,8 @@ function centsToDecimalString(raw: string): string {
 
 export default async function migratePricesToDecimal({ container, args }: ExecArgs) {
   const knex = container.resolve('__pg_connection__')
-  const commit = args.includes('--commit')
-  const force = args.includes('--force')
+  const commit = args.includes('commit')
+  const force = args.includes('force')
 
   await knex.schema.createTableIfNotExists('pricing_decimal_migration_log', (t: any) => {
     t.increments('id').primary()
@@ -74,7 +74,7 @@ export default async function migratePricesToDecimal({ container, args }: ExecAr
   if (commit) {
     const existing = await knex('pricing_decimal_migration_log').where({ mode: 'commit' }).first()
     if (existing && !force) {
-      console.log(`Refusing to run: migration already committed at ${existing.ran_at}. Pass --force to re-run anyway.`)
+      console.log(`Refusing to run: migration already committed at ${existing.ran_at}. Pass "force" to re-run anyway.`)
       return
     }
   }
