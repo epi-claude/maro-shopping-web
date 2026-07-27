@@ -33,7 +33,7 @@ export class PaywisePaymentService extends AbstractPaymentProvider<PaywiseOption
     const customer = (input.context?.customer ?? {}) as Record<string, string>
     const [firstName, ...rest] = (customer.name ?? 'Customer').split(' ')
     const lastName = rest.join(' ') || firstName
-    const amountStr = (Number(input.amount) / 100).toFixed(2)
+    const amountStr = Number(input.amount).toFixed(2)
 
     const response = await this.client.requestPayment({
       id: (input.context?.idempotency_key as string) ?? `maro-${Date.now()}`,
@@ -115,7 +115,7 @@ export class PaywisePaymentService extends AbstractPaymentProvider<PaywiseOption
     const pwStatus = (body?.status ?? '') as string
 
     if (pwStatus === 'completed' || pwStatus === 'successful') {
-      return { action: 'authorized', data: { session_id: body.reference as string, amount: Number(body.amount) * 100 } }
+      return { action: 'authorized', data: { session_id: body.reference as string, amount: Number(body.amount) } }
     }
     if (pwStatus === 'failed' || pwStatus === 'cancelled') {
       return { action: 'failed', data: { session_id: body.reference as string, amount: 0 } }

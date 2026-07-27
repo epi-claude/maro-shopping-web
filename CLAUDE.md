@@ -40,7 +40,7 @@ Note: the backend's actual Railway service name is `maro-shopping-web` (not `bac
 - CORS values are comma-separated strings — no spaces between entries
 - Resend sending address must use verified domain: notify.e-dmm.com
 - Cloudflare R2 requires `additional_client_config: { forcePathStyle: true }` in the S3 provider config
-- All monetary `amount` fields (prices, totals, shipping costs) are stored in the currency's **minor unit** (e.g. cents), not major/decimal dollars — e.g. `unit_price: 47300` means $473.00. Always divide by 100 when displaying, and remember this when writing a one-off script that sets a price directly (`amount: 1` creates a $0.01 price, not $1.00).
+- All monetary `amount` fields (prices, totals, shipping costs) are stored as **decimal major-unit values** — Medusa v2's native convention, matching the stock Admin dashboard's own assumption — e.g. `unit_price: 473.00` means $473.00. **Never divide or multiply by 100 anywhere** (storefront, backend, one-off scripts, payment provider integrations): `amount: 1` means $1.00, not $0.01 and not $100. This was migrated 2026-07-27 from an earlier (wrong) cents-based convention that caused every Admin dashboard total to display 100x too high — see the `pricing-decimal-migration` memory before ever reintroducing a `/100` or `*100` on a money field.
 
 ## Local development
 ```bash

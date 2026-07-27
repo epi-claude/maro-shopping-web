@@ -239,8 +239,8 @@ OrderPlacedTemplate.PreviewProps = {
     email: 'test@example.com',
     currency_code: 'USD',
     items: [
-      { id: 'item-1', title: 'Item 1', product_title: 'Product 1', variant_title: 'Burgundy / S', quantity: 2, unit_price: 1000 },
-      { id: 'item-2', title: 'Item 2', product_title: 'Product 2', variant_title: 'Black / M', quantity: 1, unit_price: 2500 }
+      { id: 'item-1', title: 'Item 1', product_title: 'Product 1', variant_title: 'Burgundy / S', quantity: 2, unit_price: 10.00 },
+      { id: 'item-2', title: 'Item 2', product_title: 'Product 2', variant_title: 'Black / M', quantity: 1, unit_price: 25.00 }
     ],
     shipping_address: {
       first_name: 'Test',
@@ -251,7 +251,7 @@ OrderPlacedTemplate.PreviewProps = {
       postal_code: '12345',
       country_code: 'US'
     },
-    summary: { raw_current_order_total: { value: 4000 } }
+    summary: { raw_current_order_total: { value: 40.00 } }
   },
   shippingAddress: {
     first_name: 'Test',
