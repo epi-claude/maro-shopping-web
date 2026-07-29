@@ -1,6 +1,7 @@
 "use client"
 
 import { Popover, Transition } from "@headlessui/react"
+import { ShoppingBag } from "@medusajs/icons"
 import { Button } from "@medusajs/ui"
 import { usePathname } from "next/navigation"
 import { Fragment, useEffect, useRef, useState } from "react"
@@ -78,10 +79,18 @@ const CartDropdown = ({
       <Popover className="relative h-full">
         <Popover.Button className="h-full">
           <LocalizedClientLink
-            className="hover:text-ui-fg-base"
+            className="relative flex items-center hover:text-maro-purple-dark"
             href="/cart"
+            aria-label={`Cart (${totalItems})`}
             data-testid="nav-cart-link"
-          >{`Cart (${totalItems})`}</LocalizedClientLink>
+          >
+            <ShoppingBag />
+            {totalItems > 0 && (
+              <span className="absolute -top-2 -right-2 flex items-center justify-center w-4 h-4 rounded-full bg-maro-purple-dark text-white text-[10px] leading-none">
+                {totalItems}
+              </span>
+            )}
+          </LocalizedClientLink>
         </Popover.Button>
         <Transition
           show={cartDropdownOpen}

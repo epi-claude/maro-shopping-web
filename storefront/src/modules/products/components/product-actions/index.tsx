@@ -1,6 +1,6 @@
 "use client"
 
-import { Button } from "@medusajs/ui"
+import { Button, Text } from "@medusajs/ui"
 import { isEqual } from "lodash"
 import { useParams, useRouter } from "next/navigation"
 import { useEffect, useMemo, useRef, useState } from "react"
@@ -230,6 +230,16 @@ export default function ProductActions({
             Buy it now
           </Button>
         </div>
+
+        {product.description && (
+          <Text
+            className="text-medium text-ui-fg-subtle whitespace-pre-line mt-4"
+            data-testid="product-description"
+          >
+            {product.description}
+          </Text>
+        )}
+
         <MobileActions
           product={product}
           variant={selectedVariant}
