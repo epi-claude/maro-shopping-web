@@ -24,7 +24,7 @@ const Hero = () => {
       </div>
 
       {/* Right: model image — hidden on mobile */}
-      <div className="hidden small:block small:w-[45%] relative bg-[#F5EDE0]">
+      <div className="hidden small:block small:w-[45%] relative bg-white">
         <Image
           src="/images/hero/boho-highlight.png"
           alt="Boho fashion at Maro Shopping"
