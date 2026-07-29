@@ -17,13 +17,15 @@ const ShippingUtilityBar = ({ regions }: ShippingUtilityBarProps) => {
   }
 
   return (
-    <div className="hidden small:flex justify-end content-container border-b border-maro-purple bg-maro-purple-light">
-      <div
-        className="py-1.5 text-ui-fg-subtle"
-        onMouseEnter={toggleState.open}
-        onMouseLeave={toggleState.close}
-      >
-        <CountrySelect toggleState={toggleState} regions={regions} />
+    <div className="hidden small:block border-b border-maro-purple bg-maro-purple-light">
+      <div className="content-container flex justify-end">
+        <div
+          className="py-1.5 text-ui-fg-subtle"
+          onMouseEnter={toggleState.open}
+          onMouseLeave={toggleState.close}
+        >
+          <CountrySelect toggleState={toggleState} regions={regions} />
+        </div>
       </div>
     </div>
   )
