@@ -29,7 +29,7 @@ const Hero = () => {
           src="/images/hero/boho-highlight.png"
           alt="Boho fashion at Maro Shopping"
           fill
-          className="object-cover object-center"
+          className="object-contain object-center"
           priority
         />
       </div>

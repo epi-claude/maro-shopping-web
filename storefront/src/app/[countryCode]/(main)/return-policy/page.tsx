@@ -23,7 +23,7 @@ export default function ReturnPolicyPage() {
             Return window
           </h2>
           <p>
-            Items may be returned within 30 days of delivery, provided they
+            Items may be returned within 14 days of delivery, provided they
             are unused, unworn, and in their original packaging with tags
             attached.
           </p>

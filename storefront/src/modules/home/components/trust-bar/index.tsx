@@ -16,7 +16,7 @@ const TRUST_ITEMS = [
   {
     Icon: Refresh,
     title: "Easy Returns",
-    subtitle: "30-day return policy",
+    subtitle: "14-day return policy",
   },
 ]
 
