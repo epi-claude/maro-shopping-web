@@ -33,8 +33,8 @@ export default async function Nav() {
                 src="/images/logo.png"
                 alt="Maro Shopping"
                 height={48}
-                width={130}
-                className="hidden small:block object-contain"
+                width={75}
+                className="hidden small:block object-contain h-12 w-auto"
                 priority
               />
               <Image
@@ -42,7 +42,7 @@ export default async function Nav() {
                 alt="Maro Shopping"
                 height={40}
                 width={40}
-                className="block small:hidden object-contain"
+                className="block small:hidden object-contain h-10 w-auto"
                 priority
               />
             </LocalizedClientLink>
