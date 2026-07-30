@@ -188,7 +188,7 @@ const Payment = ({
 
           {paidByGiftcard && (
             <div className="flex flex-col w-1/3">
-              <Text className="txt-medium-plus text-ui-fg-base mb-1">
+              <Text className="txt-medium-plus text-ui-fg-base mb-1 font-bold">
                 Payment method
               </Text>
               <Text
@@ -226,7 +226,7 @@ const Payment = ({
           {cart && paymentReady && activeSession ? (
             <div className="flex items-start gap-x-1 w-full">
               <div className="flex flex-col w-1/3">
-                <Text className="txt-medium-plus text-ui-fg-base mb-1">
+                <Text className="txt-medium-plus text-ui-fg-base mb-1 font-bold">
                   Payment method
                 </Text>
                 <Text
@@ -238,7 +238,7 @@ const Payment = ({
                 </Text>
               </div>
               <div className="flex flex-col w-1/3">
-                <Text className="txt-medium-plus text-ui-fg-base mb-1">
+                <Text className="txt-medium-plus text-ui-fg-base mb-1 font-bold">
                   Payment details
                 </Text>
                 <div
@@ -260,7 +260,7 @@ const Payment = ({
             </div>
           ) : paidByGiftcard ? (
             <div className="flex flex-col w-1/3">
-              <Text className="txt-medium-plus text-ui-fg-base mb-1">
+              <Text className="txt-medium-plus text-ui-fg-base mb-1 font-bold">
                 Payment method
               </Text>
               <Text

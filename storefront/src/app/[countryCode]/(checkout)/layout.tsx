@@ -28,9 +28,9 @@ export default function CheckoutLayout({
             <Image
               src="/images/logo.png"
               alt="Maro Shopping"
-              height={44}
-              width={120}
-              className="object-contain"
+              height={36}
+              width={56}
+              className="object-contain h-9 w-auto"
               priority
             />
           </LocalizedClientLink>

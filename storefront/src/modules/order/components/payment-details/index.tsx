@@ -27,7 +27,7 @@ const PaymentDetails = ({ order }: PaymentDetailsProps) => {
         {payment && (
           <div className="flex items-start gap-x-1 w-full">
             <div className="flex flex-col w-1/3">
-              <Text className="txt-medium-plus text-ui-fg-base mb-1">
+              <Text className="txt-medium-plus text-ui-fg-base mb-1 font-bold">
                 Payment method
               </Text>
               <Text
@@ -38,7 +38,7 @@ const PaymentDetails = ({ order }: PaymentDetailsProps) => {
               </Text>
             </div>
             <div className="flex flex-col w-2/3">
-              <Text className="txt-medium-plus text-ui-fg-base mb-1">
+              <Text className="txt-medium-plus text-ui-fg-base mb-1 font-bold">
                 Payment details
               </Text>
               <div className="flex gap-2 txt-medium text-ui-fg-subtle items-center">
@@ -65,8 +65,8 @@ const PaymentDetails = ({ order }: PaymentDetailsProps) => {
               Bank transfer instructions
             </Text>
             <Text className="txt-small text-ui-fg-subtle">
-              Tap any field below to copy it, then switch to your banking app
-              to pay.
+              Click the copy button next to any field, then paste it into
+              your banking app to pay.
             </Text>
             <div className="flex flex-col gap-y-2">
               <CopyField label="Bank" value={bankDetails.bank_name} />

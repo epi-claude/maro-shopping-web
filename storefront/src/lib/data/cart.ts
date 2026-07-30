@@ -298,6 +298,7 @@ export async function submitPromotionForm(
 
 // TODO: Pass a POJO instead of a form entity here
 export async function setAddresses(currentState: unknown, formData: FormData) {
+  let countryCode = ""
   try {
     if (!formData) {
       throw new Error("No form data found when setting addresses")
@@ -307,17 +308,20 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
       throw new Error("No existing cart found when setting addresses")
     }
 
+    const cart = await retrieveCart()
+    countryCode =
+      cart?.shipping_address?.country_code ||
+      cart?.region?.countries?.[0]?.iso_2 ||
+      ""
+
     const data = {
       shipping_address: {
         first_name: formData.get("shipping_address.first_name"),
         last_name: formData.get("shipping_address.last_name"),
         address_1: formData.get("shipping_address.address_1"),
-        address_2: "",
-        company: formData.get("shipping_address.company"),
-        postal_code: formData.get("shipping_address.postal_code"),
+        address_2: formData.get("shipping_address.address_2"),
         city: formData.get("shipping_address.city"),
-        country_code: formData.get("shipping_address.country_code"),
-        province: formData.get("shipping_address.province"),
+        country_code: countryCode,
         phone: formData.get("shipping_address.phone"),
       },
       email: formData.get("email"),
@@ -344,9 +348,7 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
     return e.message
   }
 
-  redirect(
-    `/${formData.get("shipping_address.country_code")}/checkout?step=delivery`
-  )
+  redirect(`/${countryCode}/checkout?step=delivery`)
 }
 
 export async function placeOrder() {
@@ -371,28 +373,4 @@ export async function placeOrder() {
   }
 
   return cartRes.cart
-}
-
-/**
- * Updates the countrycode param and revalidates the regions cache
- * @param regionId
- * @param countryCode
- */
-export async function updateRegion(countryCode: string, currentPath: string) {
-  const cartId = await getCartId()
-  const region = await getRegion(countryCode)
-
-  if (!region) {
-    throw new Error(`Region not found for country code: ${countryCode}`)
-  }
-
-  if (cartId) {
-    await updateCart({ region_id: region.id })
-    revalidateTag("cart")
-  }
-
-  revalidateTag("regions")
-  revalidateTag("products")
-
-  redirect(`/${countryCode}${currentPath}`)
 }

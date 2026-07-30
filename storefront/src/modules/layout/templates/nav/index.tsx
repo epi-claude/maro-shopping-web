@@ -1,28 +1,23 @@
 import { Suspense } from "react"
 import Image from "next/image"
 
-import { listRegions } from "@lib/data/regions"
 import { getCategoriesList } from "@lib/data/categories"
-import { StoreRegion } from "@medusajs/types"
 import { User, MagnifyingGlass, ShoppingBag } from "@medusajs/icons"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import CartButton from "@modules/layout/components/cart-button"
 import SideMenu from "@modules/layout/components/side-menu"
 import CategoriesDropdown from "@modules/layout/components/categories-dropdown"
-import ShippingUtilityBar from "@modules/layout/components/shipping-utility-bar"
 
 export default async function Nav() {
-  const regions = await listRegions().then((regions: StoreRegion[]) => regions)
   const { product_categories } = await getCategoriesList(0, 100)
 
   return (
     <div className="sticky top-0 inset-x-0 z-50 group">
-      <ShippingUtilityBar regions={regions} />
       <header className="relative h-20 mx-auto duration-200 bg-maro-purple-light border-b border-maro-purple">
         <nav className="content-container txt-small-plus flex items-center justify-between w-full h-full text-maro-black">
           <div className="flex items-center h-full gap-x-3">
             <div className="h-full small:hidden">
-              <SideMenu regions={regions} />
+              <SideMenu />
             </div>
             <LocalizedClientLink
               href="/"
