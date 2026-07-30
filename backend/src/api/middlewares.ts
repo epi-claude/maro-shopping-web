@@ -22,5 +22,10 @@ export default defineMiddlewares({
       matcher: '/store/orders/:id/payment-proof',
       middlewares: [uploadPaymentProof.single('file')],
     },
+    {
+      method: ['POST'],
+      matcher: '/store/carts/:id/payment-proof',
+      middlewares: [uploadPaymentProof.single('file')],
+    },
   ],
 })

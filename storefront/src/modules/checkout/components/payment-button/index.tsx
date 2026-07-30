@@ -13,11 +13,13 @@ import { isBankTransfer, isCod, isManual, isPaypal, isStripe } from "@lib/consta
 
 type PaymentButtonProps = {
   cart: HttpTypes.StoreCart
+  paymentProofReady?: boolean
   "data-testid": string
 }
 
 const PaymentButton: React.FC<PaymentButtonProps> = ({
   cart,
+  paymentProofReady = true,
   "data-testid": dataTestId,
 }) => {
   const notReady =
@@ -25,7 +27,8 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
     !cart.shipping_address ||
     !cart.billing_address ||
     !cart.email ||
-    (cart.shipping_methods?.length ?? 0) < 1
+    (cart.shipping_methods?.length ?? 0) < 1 ||
+    !paymentProofReady
 
   // TODO: Add this once gift cards are implemented
   // const paidByGiftcard =

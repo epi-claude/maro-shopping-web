@@ -1,8 +1,11 @@
 "use client"
 
+import { useState } from "react"
 import { Heading, Text, clx } from "@medusajs/ui"
 
 import PaymentButton from "../payment-button"
+import BankTransferProof from "../bank-transfer-proof"
+import { isBankTransfer } from "@lib/constants"
 import { useSearchParams } from "next/navigation"
 
 const Review = ({ cart }: { cart: any }) => {
@@ -17,6 +20,12 @@ const Review = ({ cart }: { cart: any }) => {
     cart.shipping_address &&
     cart.shipping_methods.length > 0 &&
     (cart.payment_collection || paidByGiftcard)
+
+  const activeSession = cart.payment_collection?.payment_sessions?.find(
+    (s: any) => s.status === "pending"
+  )
+  const requiresPaymentProof = isBankTransfer(activeSession?.provider_id)
+  const [proofUploaded, setProofUploaded] = useState(false)
 
   return (
     <div className="bg-white">
@@ -35,7 +44,10 @@ const Review = ({ cart }: { cart: any }) => {
       </div>
       {isOpen && previousStepsCompleted && (
         <>
-          <div className="flex items-start gap-x-1 w-full mb-6">
+          {requiresPaymentProof && (
+            <BankTransferProof cart={cart} onStatusChange={setProofUploaded} />
+          )}
+          <div className="flex items-start gap-x-1 w-full mb-6 mt-6">
             <div className="w-full">
               <Text className="txt-medium-plus text-ui-fg-base mb-1">
                 By clicking the Place Order button, you confirm that you have
@@ -45,7 +57,11 @@ const Review = ({ cart }: { cart: any }) => {
               </Text>
             </div>
           </div>
-          <PaymentButton cart={cart} data-testid="submit-order-button" />
+          <PaymentButton
+            cart={cart}
+            paymentProofReady={!requiresPaymentProof || proofUploaded}
+            data-testid="submit-order-button"
+          />
         </>
       )}
     </div>

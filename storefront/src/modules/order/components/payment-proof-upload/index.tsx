@@ -20,19 +20,33 @@ const ALLOWED_MIME_TYPES = [
 const ACCEPTED_FORMATS_LABEL = "JPEG, PNG, WEBP, or HEIC"
 
 type PaymentProofUploadProps = {
-  orderId: string
+  targetType?: "order" | "cart"
+  orderId?: string
+  cartId?: string
   initialStatus?: string
+  onUploaded?: () => void
+  promptLabel?: string
 }
 
 const PaymentProofUpload = ({
+  targetType = "order",
   orderId,
+  cartId,
   initialStatus,
+  onUploaded,
+  promptLabel = "Paid already? Upload your payment screenshot",
 }: PaymentProofUploadProps) => {
   const [status, setStatus] = useState<"idle" | "uploading" | "uploaded">(
     initialStatus === "pending_review" ? "uploaded" : "idle"
   )
   const [error, setError] = useState<string | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+
+  const targetId = targetType === "cart" ? cartId : orderId
+  const uploadPath =
+    targetType === "cart"
+      ? `/store/carts/${targetId}/payment-proof`
+      : `/store/orders/${targetId}/payment-proof`
 
   const handleFileChange = async (
     e: React.ChangeEvent<HTMLInputElement>
@@ -68,23 +82,21 @@ const PaymentProofUpload = ({
     formData.append("file", file)
 
     try {
-      const res = await fetch(
-        `${MEDUSA_BACKEND_URL}/store/orders/${orderId}/payment-proof`,
-        {
-          method: "POST",
-          headers: {
-            "x-publishable-api-key":
-              process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "",
-          },
-          body: formData,
-        }
-      )
+      const res = await fetch(`${MEDUSA_BACKEND_URL}${uploadPath}`, {
+        method: "POST",
+        headers: {
+          "x-publishable-api-key":
+            process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "",
+        },
+        body: formData,
+      })
 
       if (!res.ok) {
         throw new Error("Upload failed")
       }
 
       setStatus("uploaded")
+      onUploaded?.()
     } catch {
       setStatus("idle")
       setError(
@@ -135,7 +147,7 @@ const PaymentProofUpload = ({
           </>
         ) : (
           <Text className="txt-medium-plus text-ui-fg-interactive">
-            Paid already? Upload your payment screenshot
+            {promptLabel}
           </Text>
         )}
       </label>

@@ -357,6 +357,24 @@ export async function placeOrder() {
     throw new Error("No existing cart found when placing an order")
   }
 
+  const cartBeforeComplete = await retrieveCart()
+  const activeSession =
+    cartBeforeComplete?.payment_collection?.payment_sessions?.find(
+      (s) => s.status === "pending"
+    )
+  const isBankTransferSession = activeSession?.provider_id?.startsWith(
+    "pp_bank-transfer_"
+  )
+
+  if (
+    isBankTransferSession &&
+    !cartBeforeComplete?.metadata?.payment_proof_url
+  ) {
+    throw new Error(
+      "Please upload your payment screenshot before placing the order."
+    )
+  }
+
   const cartRes = await sdk.store.cart
     .complete(cartId, {}, await getAuthHeaders())
     .then((cartRes) => {
@@ -368,6 +386,24 @@ export async function placeOrder() {
   if (cartRes?.type === "order") {
     const countryCode =
       cartRes.order.shipping_address?.country_code?.toLowerCase()
+
+    if (isBankTransferSession && cartBeforeComplete?.metadata?.payment_proof_url) {
+      await fetch(
+        `${process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000"}/store/orders/${cartRes.order.id}/payment-proof/link`,
+        {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+            "x-publishable-api-key":
+              process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "",
+          },
+          body: JSON.stringify({ cart_id: cartId }),
+        }
+      ).catch(() => {
+        // best-effort: the order still confirms even if this link call fails
+      })
+    }
+
     await removeCartId()
     redirect(`/${countryCode}/order/confirmed/${cartRes?.order.id}`)
   }
