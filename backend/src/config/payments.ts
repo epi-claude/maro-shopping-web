@@ -28,7 +28,7 @@ export const paymentProviders: object[] = [
       account_number: process.env.BANK_TRANSFER_ACCOUNT_NUMBER || '',
       routing_number: process.env.BANK_TRANSFER_ROUTING_NUMBER || '',
       account_type: process.env.BANK_TRANSFER_ACCOUNT_TYPE || '',
-      instructions: process.env.BANK_TRANSFER_INSTRUCTIONS || 'Use your order number as the payment reference.',
+      instructions: process.env.BANK_TRANSFER_INSTRUCTIONS || '',
     },
   },
 

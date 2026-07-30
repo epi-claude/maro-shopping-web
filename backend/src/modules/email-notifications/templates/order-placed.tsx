@@ -218,9 +218,11 @@ export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
                 Account Type: {bankDetails.account_type}
               </Text>
             )}
-            <Text style={{ margin: '15px 0 0' }}>
-              {bankDetails.instructions}
-            </Text>
+            {bankDetails.instructions && (
+              <Text style={{ margin: '15px 0 0' }}>
+                {bankDetails.instructions}
+              </Text>
+            )}
           </>
         )}
       </Section>
