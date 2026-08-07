@@ -2,6 +2,7 @@
 
 import { Popover, Transition } from "@headlessui/react"
 import { XMark } from "@medusajs/icons"
+import { HttpTypes } from "@medusajs/types"
 import { Text } from "@medusajs/ui"
 import { Fragment } from "react"
 
@@ -13,7 +14,13 @@ const SideMenuItems = {
   "New Arrivals": "/collections/new-arrivals",
 }
 
-const SideMenu = () => {
+type SideMenuProps = {
+  categories?: HttpTypes.StoreProductCategory[]
+}
+
+const SideMenu = ({ categories = [] }: SideMenuProps) => {
+  const topLevelCategories = categories.filter((c) => !c.parent_category)
+
   return (
     <div className="h-full">
       <div className="flex items-center h-full">
@@ -39,10 +46,10 @@ const SideMenu = () => {
                 leaveFrom="opacity-100 backdrop-blur-2xl"
                 leaveTo="opacity-0"
               >
-                <Popover.Panel className="flex flex-col absolute w-full pr-4 sm:pr-0 sm:w-1/3 2xl:w-1/4 sm:min-w-min h-[calc(100vh-1rem)] z-30 inset-x-0 text-sm text-maro-black m-2">
+                <Popover.Panel className="flex flex-col fixed w-full pr-4 sm:pr-0 sm:w-1/3 2xl:w-1/4 sm:min-w-min h-[calc(100vh-5.5rem)] z-30 inset-x-0 top-20 text-sm text-maro-black m-2">
                   <div
                     data-testid="nav-menu-popup"
-                    className="flex flex-col h-full bg-white border border-maro-purple rounded-large shadow-lg justify-between p-6"
+                    className="flex flex-col h-full bg-white border border-maro-purple rounded-large shadow-lg justify-between p-6 overflow-hidden"
                   >
                     <div className="flex justify-end" id="xmark">
                       <button
@@ -53,22 +60,45 @@ const SideMenu = () => {
                         <XMark />
                       </button>
                     </div>
-                    <ul className="flex flex-col gap-6 items-start justify-start">
-                      {Object.entries(SideMenuItems).map(([name, href]) => {
-                        return (
-                          <li key={name}>
-                            <LocalizedClientLink
-                              href={href}
-                              className="text-3xl leading-10 font-medium hover:text-maro-purple-dark"
-                              onClick={close}
-                              data-testid={`${name.toLowerCase()}-link`}
-                            >
-                              {name}
-                            </LocalizedClientLink>
-                          </li>
-                        )
-                      })}
-                    </ul>
+                    <div className="flex flex-col gap-6 items-start justify-start overflow-y-auto flex-1 py-6">
+                      <ul className="flex flex-col gap-6 items-start justify-start">
+                        {Object.entries(SideMenuItems).map(([name, href]) => {
+                          return (
+                            <li key={name}>
+                              <LocalizedClientLink
+                                href={href}
+                                className="text-3xl leading-10 font-medium hover:text-maro-purple-dark"
+                                onClick={close}
+                                data-testid={`${name.toLowerCase()}-link`}
+                              >
+                                {name}
+                              </LocalizedClientLink>
+                            </li>
+                          )
+                        })}
+                      </ul>
+                      {!!topLevelCategories.length && (
+                        <div className="flex flex-col gap-3 w-full border-t border-maro-purple-light pt-6">
+                          <Text className="txt-compact-small font-medium text-ui-fg-subtle uppercase tracking-wide">
+                            Categories
+                          </Text>
+                          <ul className="flex flex-col gap-3">
+                            {topLevelCategories.map((category) => (
+                              <li key={category.id}>
+                                <LocalizedClientLink
+                                  href={`/categories/${category.handle}`}
+                                  className="text-xl leading-8 font-medium hover:text-maro-purple-dark"
+                                  onClick={close}
+                                  data-testid="side-menu-category-link"
+                                >
+                                  {category.name}
+                                </LocalizedClientLink>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
                     <div className="flex flex-col gap-y-6">
                       <Text className="flex justify-between txt-compact-small">
                         © {new Date().getFullYear()} Maro Shopping Online. All rights

@@ -17,7 +17,7 @@ export default async function Nav() {
         <nav className="content-container txt-small-plus flex items-center justify-between w-full h-full text-maro-black">
           <div className="flex items-center h-full gap-x-3">
             <div className="h-full small:hidden">
-              <SideMenu />
+              <SideMenu categories={product_categories || []} />
             </div>
             <LocalizedClientLink
               href="/"
