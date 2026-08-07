@@ -69,7 +69,7 @@ export default async function Nav() {
           </div>
 
           <div className="flex items-center gap-x-5 h-full">
-            <div className="hidden small:flex items-center gap-x-5 h-full">
+            <div className="flex items-center gap-x-5 h-full">
               {process.env.NEXT_PUBLIC_FEATURE_SEARCH_ENABLED && (
                 <LocalizedClientLink
                   className="hover:text-maro-purple-dark"
